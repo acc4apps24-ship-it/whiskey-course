@@ -247,3 +247,19 @@ textarea {
     opacity: 0;
   }
 }
+
+@supports (height: 100dvh) {
+  .min-h-screen-dynamic {
+    min-height: 100dvh;
+  }
+}
+
+@media (max-width: 430px) {
+  h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-card-stack {
+    gap: 0.875rem;
+  }
+}
