@@ -56,16 +56,30 @@ create table if not exists public.wj_tasting_notes (
 );
 
 create or replace view public.wj_leaderboard as
+with xp_totals as (
+  select
+    user_id,
+    sum(xp_delta)::integer as total_xp
+  from public.wj_xp_events
+  group by user_id
+),
+completed_totals as (
+  select
+    user_id,
+    count(*)::integer as completed_chapters
+  from public.wj_progress
+  where status = 'completed'
+  group by user_id
+)
 select
   u.id as user_id,
   u.display_name,
-  coalesce(sum(x.xp_delta), 0)::integer as total_xp,
-  count(distinct p.chapter_id) filter (where p.status = 'completed')::integer as completed_chapters,
+  coalesce(x.total_xp, 0) as total_xp,
+  coalesce(p.completed_chapters, 0) as completed_chapters,
   u.last_seen_at
 from public.wj_users u
-left join public.wj_xp_events x on x.user_id = u.id
-left join public.wj_progress p on p.user_id = u.id
-group by u.id, u.display_name, u.last_seen_at
+left join xp_totals x on x.user_id = u.id
+left join completed_totals p on p.user_id = u.id
 order by total_xp desc, completed_chapters desc, u.last_seen_at asc;
 
 alter table public.wj_users enable row level security;
