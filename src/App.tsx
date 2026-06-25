@@ -50,7 +50,9 @@ function AppContent() {
   );
   const finalSummary = finalResult
     ? {
-        totalXp: (app.session?.totalXp ?? 0) + localXp + finalResult.xp,
+        totalXp:
+          currentLeaderboardEntry?.totalXp ??
+          (app.session?.totalXp ?? 0) + localXp + finalResult.xp,
         achievements: Array.from(
           new Set([
             ...(app.session?.achievements ?? []),
@@ -173,11 +175,13 @@ function AppContent() {
                       xpDelta: result.xp,
                     });
                     const savedResult = { ...result, xp: saved.xpAwarded };
+                    try {
+                      const entries = await app.repository.getLeaderboard(app.session.userId);
+                      setLeaderboard(entries ?? []);
+                    } catch {
+                      setLeaderboard([]);
+                    }
                     setFinalResult(savedResult);
-                    app.repository
-                      .getLeaderboard(app.session.userId)
-                      .then((entries) => setLeaderboard(entries ?? []))
-                      .catch(() => undefined);
                     return savedResult;
                   }}
                 />

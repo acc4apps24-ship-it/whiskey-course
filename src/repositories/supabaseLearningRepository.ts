@@ -34,6 +34,15 @@ type FinalEventRow = {
   user_id: string;
 };
 
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "23505"
+  );
+}
+
 export function createSupabaseLearningRepository(client: SupabaseClient): LearningRepository {
   async function recordXpEvent(input: {
     userId: string;
@@ -61,6 +70,7 @@ export function createSupabaseLearningRepository(client: SupabaseClient): Learni
       reason: input.reason,
     });
 
+    if (isUniqueViolation(error)) return { xpAwarded: 0 };
     if (error) throw error;
     return { xpAwarded: input.xpDelta };
   }
