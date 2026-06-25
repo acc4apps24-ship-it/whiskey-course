@@ -105,6 +105,16 @@ describe("onboarding", () => {
     expect(mocks.cookie).toBeNull();
   });
 
+  it("shows load errors for an existing cookie session", async () => {
+    mocks.cookie = "session_1";
+    mocks.repository.getSession.mockRejectedValue(new Error("network"));
+
+    render(<App />);
+
+    expect(await screen.findByText("Не удалось загрузить сессию.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Мне есть 18" })).toBeInTheDocument();
+  });
+
   it("creates a session, stores its cookie, and opens the course", async () => {
     const user = userEvent.setup();
     render(<App />);
