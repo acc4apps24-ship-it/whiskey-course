@@ -1,10 +1,29 @@
+import { useMemo, useState } from "react";
 import { AppProvider, useAppState } from "@/app/AppProvider";
 import { BrandedLoader } from "@/components/BrandedLoader";
+import { course, getChapter } from "@/content/course";
+import { CardPlayer } from "@/features/course/CardPlayer";
+import { CourseMap } from "@/features/course/CourseMap";
 import { AgeGate } from "@/features/onboarding/AgeGate";
 import { NameGate } from "@/features/onboarding/NameGate";
 
 function AppContent() {
   const app = useAppState();
+  const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
+  const [locallyCompletedChapterIds, setLocallyCompletedChapterIds] = useState<
+    string[]
+  >([]);
+  const activeChapter = activeChapterId ? getChapter(activeChapterId) : undefined;
+  const completedChapterIds = useMemo(
+    () =>
+      Array.from(
+        new Set([
+          ...(app.session?.completedChapterIds ?? []),
+          ...locallyCompletedChapterIds,
+        ]),
+      ),
+    [app.session?.completedChapterIds, locallyCompletedChapterIds],
+  );
 
   return (
     <main className="min-h-[100svh] px-5 py-6 safe-bottom">
@@ -23,14 +42,27 @@ function AppContent() {
             onSubmit={app.createSession}
           />
         ) : null}
-        {app.screen === "course" ? (
-          <div>
+        {app.screen === "course" && activeChapter ? (
+          <CardPlayer
+            chapter={activeChapter}
+            onCompleteChapter={(chapterId) => {
+              setLocallyCompletedChapterIds((current) =>
+                Array.from(new Set([...current, chapterId])),
+              );
+              setActiveChapterId(null);
+            }}
+          />
+        ) : null}
+        {app.screen === "course" && !activeChapter ? (
+          <div className="grid gap-4">
             <p className="text-sm text-smoke">
               С возвращением, {app.session?.displayName}.
             </p>
-            <h1 className="mt-3 text-4xl font-bold leading-none tracking-normal">
-              Карта курса
-            </h1>
+            <CourseMap
+              course={course}
+              completedChapterIds={completedChapterIds}
+              onOpenChapter={setActiveChapterId}
+            />
           </div>
         ) : null}
       </section>
