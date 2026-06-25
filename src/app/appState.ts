@@ -6,5 +6,6 @@ export type AppState = {
   screen: AppScreen;
   ageAccepted: boolean;
   session: UserSession | null;
+  isCreatingSession: boolean;
   error: string | null;
 };

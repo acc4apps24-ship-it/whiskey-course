@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -32,10 +33,12 @@ function makeRepository(): LearningRepository {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const repository = useMemo(makeRepository, []);
+  const isCreatingSessionRef = useRef(false);
   const [state, setState] = useState<AppState>({
     screen: "loading",
     ageAccepted: false,
     session: null,
+    isCreatingSession: false,
     error: null,
   });
 
@@ -59,6 +62,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             ...current,
             screen: "age-gate",
             session: null,
+            isCreatingSession: false,
           }));
           return;
         }
@@ -68,6 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           screen: "course",
           ageAccepted: true,
           session,
+          isCreatingSession: false,
           error: null,
         }));
       })
@@ -77,6 +82,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setState((current) => ({
           ...current,
           screen: "age-gate",
+          isCreatingSession: false,
           error: "Не удалось загрузить сессию.",
         }));
       });
@@ -91,20 +97,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ...current,
       ageAccepted: true,
       screen: "name-gate",
+      isCreatingSession: false,
       error: null,
     }));
   }, []);
 
   const createSession = useCallback(
     async (displayName: string) => {
-      const session: UserSession = await repository.createSession(displayName);
-      setSessionIdCookie(session.sessionId);
+      if (isCreatingSessionRef.current) return;
+
+      isCreatingSessionRef.current = true;
       setState((current) => ({
         ...current,
-        session,
-        screen: "course",
+        isCreatingSession: true,
         error: null,
       }));
+
+      try {
+        const session: UserSession = await repository.createSession(displayName);
+        setSessionIdCookie(session.sessionId);
+        setState((current) => ({
+          ...current,
+          session,
+          screen: "course",
+          isCreatingSession: false,
+          error: null,
+        }));
+      } catch {
+        setState((current) => ({
+          ...current,
+          screen: "name-gate",
+          isCreatingSession: false,
+          error: "Не удалось создать сессию.",
+        }));
+      } finally {
+        isCreatingSessionRef.current = false;
+      }
     },
     [repository],
   );

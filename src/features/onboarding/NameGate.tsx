@@ -4,15 +4,20 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 export function NameGate({
+  error: submitError,
+  isSubmitting = false,
   onSubmit,
 }: {
-  onSubmit: (displayName: string) => void;
+  error?: string | null;
+  isSubmitting?: boolean;
+  onSubmit: (displayName: string) => Promise<void> | void;
 }) {
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  function submit(event: FormEvent) {
+  async function submit(event: FormEvent) {
     event.preventDefault();
+    if (isSubmitting) return;
 
     const trimmed = name.trim();
 
@@ -22,7 +27,7 @@ export function NameGate({
     }
 
     setError(null);
-    onSubmit(trimmed);
+    await onSubmit(trimmed);
   }
 
   return (
@@ -35,12 +40,16 @@ export function NameGate({
           Имя в рейтинге
           <Input
             value={name}
+            disabled={isSubmitting}
             onChange={(event) => setName(event.target.value)}
             maxLength={24}
           />
         </label>
         {error ? <p className="text-sm text-red-200">{error}</p> : null}
-        <Button type="submit">Начать путешествие</Button>
+        {submitError ? <p className="text-sm text-red-200">{submitError}</p> : null}
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Создаём сессию..." : "Начать путешествие"}
+        </Button>
       </form>
     </Card>
   );
