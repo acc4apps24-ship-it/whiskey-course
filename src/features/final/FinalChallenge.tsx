@@ -9,6 +9,12 @@ type FinalChallengeResult = {
   xp: number;
 };
 
+type FinalChallengeSummary = {
+  totalXp?: number;
+  achievements?: string[];
+  leaderboardRank?: number;
+};
+
 function getResultMessage(correctAnswers: number): string {
   if (correctAnswers <= 7) {
     return "Ты только начал путь. Повтори главы про регионы и бочки - там спрятана большая часть ответов.";
@@ -24,9 +30,11 @@ function getResultMessage(correctAnswers: number): string {
 }
 
 export function FinalChallenge({
+  summary,
   questions,
   onComplete,
 }: {
+  summary?: FinalChallengeSummary;
   questions: FinalQuestion[];
   onComplete: (result: FinalChallengeResult) => void | Promise<void>;
 }) {
@@ -81,6 +89,21 @@ export function FinalChallenge({
           <p className="mt-2 text-sm text-stone-200">
             XP за финал: {completedResult.xp}
           </p>
+          {typeof summary?.totalXp === "number" ? (
+            <p className="mt-2 text-sm text-stone-200">
+              Общий XP: {summary.totalXp}
+            </p>
+          ) : null}
+          {typeof summary?.leaderboardRank === "number" ? (
+            <p className="mt-2 text-sm text-stone-200">
+              Место в leaderboard: #{summary.leaderboardRank}
+            </p>
+          ) : null}
+          {summary?.achievements?.length ? (
+            <p className="mt-2 text-sm text-stone-200">
+              Достижения: {summary.achievements.join(", ")}
+            </p>
+          ) : null}
           <p className="mt-3 text-sm leading-6 text-stone-200">
             {getResultMessage(completedResult.correctAnswers)}
           </p>

@@ -24,6 +24,15 @@ type LeaderboardRow = {
   completed_chapters: number;
 };
 
+type ProgressRow = {
+  user_id: string;
+  chapter_id: string;
+};
+
+type FinalEventRow = {
+  user_id: string;
+};
+
 export function createSupabaseLearningRepository(client: SupabaseClient): LearningRepository {
   async function buildSession(row: UserRow): Promise<UserSession> {
     const { data: leaderboard, error: leaderboardError } = await client
@@ -160,13 +169,51 @@ export function createSupabaseLearningRepository(client: SupabaseClient): Learni
 
       if (error) throw error;
 
-      return ((data ?? []) as LeaderboardRow[]).map((row, index): LeaderboardEntry => ({
+      const rows = (data ?? []) as LeaderboardRow[];
+      const userIds = rows.map((row) => row.user_id);
+      const completedByUser = new Map<string, string[]>();
+      const finalCompletedUserIds = new Set<string>();
+
+      if (userIds.length > 0) {
+        const { data: progress, error: progressError } = await client
+          .from("wj_progress")
+          .select("user_id, chapter_id")
+          .in("user_id", userIds)
+          .eq("status", "completed");
+
+        if (progressError) throw progressError;
+
+        for (const item of (progress ?? []) as ProgressRow[]) {
+          completedByUser.set(item.user_id, [
+            ...(completedByUser.get(item.user_id) ?? []),
+            item.chapter_id,
+          ]);
+        }
+
+        const { data: finalEvents, error: finalEventsError } = await client
+          .from("wj_xp_events")
+          .select("user_id")
+          .in("user_id", userIds)
+          .eq("event_type", "final")
+          .eq("source_id", "final-challenge");
+
+        if (finalEventsError) throw finalEventsError;
+
+        for (const item of (finalEvents ?? []) as FinalEventRow[]) {
+          finalCompletedUserIds.add(item.user_id);
+        }
+      }
+
+      return rows.map((row, index): LeaderboardEntry => ({
         rank: index + 1,
         userId: row.user_id,
         displayName: row.display_name,
         totalXp: row.total_xp,
         completedChapters: row.completed_chapters,
-        achievements: [],
+        achievements: getUnlockedAchievementIds(
+          completedByUser.get(row.user_id) ?? [],
+          finalCompletedUserIds.has(row.user_id),
+        ),
         isCurrentUser: row.user_id === currentUserId,
       }));
     },

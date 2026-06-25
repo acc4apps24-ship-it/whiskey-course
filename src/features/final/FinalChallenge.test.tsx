@@ -18,6 +18,11 @@ describe("FinalChallenge", () => {
 
     render(
       <FinalChallenge
+        summary={{
+          totalXp: 640,
+          achievements: ["Мастер виски (Whisky Master)"],
+          leaderboardRank: 3,
+        }}
         questions={course.finalChallenge.questions.slice(0, 1)}
         onComplete={onComplete}
       />,
@@ -27,6 +32,9 @@ describe("FinalChallenge", () => {
     await userEvent.click(screen.getByRole("button", { name: "Завершить испытание" }));
 
     expect(onComplete).toHaveBeenCalledWith({ correctAnswers: 1, xp: 10 });
+    expect(screen.getByText("Общий XP: 640")).toBeInTheDocument();
+    expect(screen.getByText("Место в leaderboard: #3")).toBeInTheDocument();
+    expect(screen.getByText("Достижения: Мастер виски (Whisky Master)")).toBeInTheDocument();
     expect(screen.getByText("Сравнить с друзьями")).toBeInTheDocument();
   });
 

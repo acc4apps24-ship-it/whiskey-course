@@ -19,6 +19,10 @@ function AppContent() {
   const [locallyCompletedChapterIds, setLocallyCompletedChapterIds] = useState<
     string[]
   >([]);
+  const [finalResult, setFinalResult] = useState<{
+    correctAnswers: number;
+    xp: number;
+  } | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const activeChapter = activeChapterId ? getChapter(activeChapterId) : undefined;
   const completedChapterIds = useMemo(
@@ -35,6 +39,18 @@ function AppContent() {
     completedChapterIds,
     course.chapters.map((chapter) => chapter.id),
   );
+  const currentLeaderboardEntry = leaderboard.find(
+    (entry) => entry.userId === app.session?.userId,
+  );
+  const finalSummary = finalResult
+    ? {
+        totalXp: (app.session?.totalXp ?? 0) + finalResult.xp,
+        achievements: Array.from(
+          new Set([...(app.session?.achievements ?? []), "ACH-005"]),
+        ),
+        leaderboardRank: currentLeaderboardEntry?.rank,
+      }
+    : undefined;
 
   useEffect(() => {
     if (!app.session) {
@@ -128,6 +144,7 @@ function AppContent() {
                   Вернуться к карте курса
                 </Button>
                 <FinalChallenge
+                  summary={finalSummary}
                   questions={course.finalChallenge.questions}
                   onComplete={async (result) => {
                     if (!app.session) return;
@@ -137,8 +154,11 @@ function AppContent() {
                       correctAnswers: result.correctAnswers,
                       xpDelta: result.xp,
                     });
-                    const entries = await app.repository.getLeaderboard(app.session.userId);
-                    setLeaderboard(entries ?? []);
+                    setFinalResult(result);
+                    app.repository
+                      .getLeaderboard(app.session.userId)
+                      .then((entries) => setLeaderboard(entries ?? []))
+                      .catch(() => undefined);
                   }}
                 />
               </div>
