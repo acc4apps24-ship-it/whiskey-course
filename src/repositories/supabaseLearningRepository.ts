@@ -34,6 +34,36 @@ type FinalEventRow = {
 };
 
 export function createSupabaseLearningRepository(client: SupabaseClient): LearningRepository {
+  async function recordXpEvent(input: {
+    userId: string;
+    eventType: string;
+    sourceId: string;
+    xpDelta: number;
+    reason: string;
+  }) {
+    const { data: existing, error: existingError } = await client
+      .from("wj_xp_events")
+      .select("id")
+      .eq("user_id", input.userId)
+      .eq("event_type", input.eventType)
+      .eq("source_id", input.sourceId)
+      .maybeSingle<{ id: string }>();
+
+    if (existingError) throw existingError;
+    if (existing) return { xpAwarded: 0 };
+
+    const { error } = await client.from("wj_xp_events").insert({
+      user_id: input.userId,
+      event_type: input.eventType,
+      source_id: input.sourceId,
+      xp_delta: input.xpDelta,
+      reason: input.reason,
+    });
+
+    if (error) throw error;
+    return { xpAwarded: input.xpDelta };
+  }
+
   async function buildSession(row: UserRow): Promise<UserSession> {
     const { data: leaderboard, error: leaderboardError } = await client
       .from("wj_leaderboard")
@@ -124,32 +154,22 @@ export function createSupabaseLearningRepository(client: SupabaseClient): Learni
 
       if (attemptError) throw attemptError;
 
-      const { error: xpError } = await client.from("wj_xp_events").upsert(
-        {
-          user_id: input.userId,
-          event_type: "answer",
-          source_id: input.activityId,
-          xp_delta: input.xpDelta,
-          reason: input.isCorrect ? "Correct answer" : "Answer without XP",
-        },
-        { onConflict: "user_id,event_type,source_id", ignoreDuplicates: true },
-      );
-
-      if (xpError) throw xpError;
+      return recordXpEvent({
+        userId: input.userId,
+        eventType: "answer",
+        sourceId: input.activityId,
+        xpDelta: input.xpDelta,
+        reason: input.isCorrect ? "Correct answer" : "Answer without XP",
+      });
     },
     async recordFinalResult(input: RecordFinalResultInput) {
-      const { error } = await client.from("wj_xp_events").upsert(
-        {
-          user_id: input.userId,
-          event_type: "final",
-          source_id: "final-challenge",
-          xp_delta: input.xpDelta,
-          reason: `Final challenge: ${input.correctAnswers} correct answers`,
-        },
-        { onConflict: "user_id,event_type,source_id", ignoreDuplicates: true },
-      );
-
-      if (error) throw error;
+      return recordXpEvent({
+        userId: input.userId,
+        eventType: "final",
+        sourceId: "final-challenge",
+        xpDelta: input.xpDelta,
+        reason: `Final challenge: ${input.correctAnswers} correct answers`,
+      });
     },
     async saveTastingNote(input: TastingNoteInput) {
       const { error } = await client.from("wj_tasting_notes").insert({

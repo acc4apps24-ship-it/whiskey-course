@@ -44,6 +44,10 @@ export type RecordFinalResultInput = {
   xpDelta: number;
 };
 
+export type XpAwardResult = {
+  xpAwarded: number;
+};
+
 export type TastingNoteInput = {
   userId: string;
   chapterId: string;
@@ -58,8 +62,8 @@ export interface LearningRepository {
   getSession(sessionId: string): Promise<UserSession | null>;
   createSession(displayName: string): Promise<UserSession>;
   saveProgress(input: SaveProgressInput): Promise<void>;
-  recordAnswer(input: RecordAnswerInput): Promise<void>;
-  recordFinalResult(input: RecordFinalResultInput): Promise<void>;
+  recordAnswer(input: RecordAnswerInput): Promise<XpAwardResult>;
+  recordFinalResult(input: RecordFinalResultInput): Promise<XpAwardResult>;
   saveTastingNote(input: TastingNoteInput): Promise<void>;
   getLeaderboard(currentUserId: string): Promise<LeaderboardEntry[]>;
 }

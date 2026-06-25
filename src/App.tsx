@@ -107,13 +107,13 @@ function AppContent() {
             onAnswerSelected={async (answer) => {
               if (!app.session) return;
 
-              await app.repository.recordAnswer({
+              const result = await app.repository.recordAnswer({
                 userId: app.session.userId,
                 ...answer,
               });
               if (!locallyRecordedAnswerIdsRef.current.has(answer.activityId)) {
                 locallyRecordedAnswerIdsRef.current.add(answer.activityId);
-                setLocalXp((current) => current + answer.xpDelta);
+                setLocalXp((current) => current + result.xpAwarded);
               }
             }}
             onCompleteChapter={async (chapterId) => {
@@ -168,12 +168,12 @@ function AppContent() {
                   onComplete={async (result) => {
                     if (!app.session) return;
 
-                    await app.repository.recordFinalResult({
+                    const saved = await app.repository.recordFinalResult({
                       userId: app.session.userId,
                       correctAnswers: result.correctAnswers,
                       xpDelta: result.xp,
                     });
-                    setFinalResult(result);
+                    setFinalResult({ ...result, xp: saved.xpAwarded });
                     app.repository
                       .getLeaderboard(app.session.userId)
                       .then((entries) => setLeaderboard(entries ?? []))

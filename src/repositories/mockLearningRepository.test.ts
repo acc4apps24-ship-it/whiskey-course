@@ -15,8 +15,8 @@ describe("createMockLearningRepository", () => {
       xpDelta: 10,
     };
 
-    await repository.recordAnswer(answer);
-    await repository.recordAnswer(answer);
+    await expect(repository.recordAnswer(answer)).resolves.toEqual({ xpAwarded: 10 });
+    await expect(repository.recordAnswer(answer)).resolves.toEqual({ xpAwarded: 0 });
 
     const leaderboard = await repository.getLeaderboard(session.userId);
     expect(leaderboard[0]).toMatchObject({
@@ -29,16 +29,16 @@ describe("createMockLearningRepository", () => {
     const repository = createMockLearningRepository();
     const session = await repository.createSession("Ada");
 
-    await repository.recordFinalResult({
+    await expect(repository.recordFinalResult({
       userId: session.userId,
       correctAnswers: 18,
       xpDelta: 180,
-    });
-    await repository.recordFinalResult({
+    })).resolves.toEqual({ xpAwarded: 180 });
+    await expect(repository.recordFinalResult({
       userId: session.userId,
       correctAnswers: 18,
       xpDelta: 180,
-    });
+    })).resolves.toEqual({ xpAwarded: 0 });
 
     const restored = await repository.getSession(session.sessionId);
     const leaderboard = await repository.getLeaderboard(session.userId);

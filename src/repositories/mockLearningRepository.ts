@@ -46,7 +46,7 @@ export function createMockLearningRepository(): LearningRepository {
     },
     async recordAnswer(input: RecordAnswerInput) {
       const eventKey = `${input.userId}:answer:${input.activityId}`;
-      if (xpEventKeys.has(eventKey)) return;
+      if (xpEventKeys.has(eventKey)) return { xpAwarded: 0 };
 
       xpEventKeys.add(eventKey);
       for (const session of sessions.values()) {
@@ -54,10 +54,11 @@ export function createMockLearningRepository(): LearningRepository {
           session.totalXp += input.xpDelta;
         }
       }
+      return { xpAwarded: input.xpDelta };
     },
     async recordFinalResult(input: RecordFinalResultInput) {
       const eventKey = `${input.userId}:final:final-challenge`;
-      if (xpEventKeys.has(eventKey)) return;
+      if (xpEventKeys.has(eventKey)) return { xpAwarded: 0 };
 
       xpEventKeys.add(eventKey);
       finalCompletedUserIds.add(input.userId);
@@ -67,6 +68,7 @@ export function createMockLearningRepository(): LearningRepository {
           session.achievements = getUnlockedAchievementIds(session.completedChapterIds, true);
         }
       }
+      return { xpAwarded: input.xpDelta };
     },
     async saveTastingNote(_input: TastingNoteInput) {
       return;
