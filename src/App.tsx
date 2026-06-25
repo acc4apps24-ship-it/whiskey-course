@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppProvider, useAppState } from "@/app/AppProvider";
 import { BrandedLoader } from "@/components/BrandedLoader";
 import { Button } from "@/components/ui/button";
 import { course, getChapter } from "@/content/course";
+import { getUnlockedAchievementIds } from "@/domain/achievements";
 import { isFinalChallengeUnlocked } from "@/domain/progress";
+import { calculateChapterCompletionXp } from "@/domain/xp";
 import { CardPlayer } from "@/features/course/CardPlayer";
 import { CourseMap } from "@/features/course/CourseMap";
 import { FinalChallenge } from "@/features/final/FinalChallenge";
@@ -19,6 +21,8 @@ function AppContent() {
   const [locallyCompletedChapterIds, setLocallyCompletedChapterIds] = useState<
     string[]
   >([]);
+  const [localXp, setLocalXp] = useState(0);
+  const locallyRecordedAnswerIdsRef = useRef(new Set<string>());
   const [finalResult, setFinalResult] = useState<{
     correctAnswers: number;
     xp: number;
@@ -44,9 +48,12 @@ function AppContent() {
   );
   const finalSummary = finalResult
     ? {
-        totalXp: (app.session?.totalXp ?? 0) + finalResult.xp,
+        totalXp: (app.session?.totalXp ?? 0) + localXp + finalResult.xp,
         achievements: Array.from(
-          new Set([...(app.session?.achievements ?? []), "ACH-005"]),
+          new Set([
+            ...(app.session?.achievements ?? []),
+            ...getUnlockedAchievementIds(completedChapterIds, true),
+          ]),
         ),
         leaderboardRank: currentLeaderboardEntry?.rank,
       }
@@ -104,8 +111,13 @@ function AppContent() {
                 userId: app.session.userId,
                 ...answer,
               });
+              if (!locallyRecordedAnswerIdsRef.current.has(answer.activityId)) {
+                locallyRecordedAnswerIdsRef.current.add(answer.activityId);
+                setLocalXp((current) => current + answer.xpDelta);
+              }
             }}
             onCompleteChapter={async (chapterId) => {
+              const alreadyCompleted = completedChapterIds.includes(chapterId);
               if (app.session) {
                 await app.repository.saveProgress({
                   userId: app.session.userId,
@@ -116,6 +128,13 @@ function AppContent() {
               setLocallyCompletedChapterIds((current) =>
                 Array.from(new Set([...current, chapterId])),
               );
+              if (!alreadyCompleted) {
+                setLocalXp(
+                  (current) =>
+                    current +
+                    calculateChapterCompletionXp({ completed: true, perfect: false }),
+                );
+              }
               setActiveChapterId(null);
             }}
             onSaveTastingNote={async (note) => {
