@@ -41,3 +41,209 @@ textarea {
 .safe-bottom {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
+
+.loader-scene {
+  position: relative;
+  isolation: isolate;
+  width: 176px;
+  height: 176px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.loader-scene::before {
+  position: absolute;
+  inset: 86px -20px 0;
+  z-index: -2;
+  content: "";
+  background:
+    linear-gradient(145deg, transparent 44%, rgba(47, 71, 58, 0.5) 45% 58%, transparent 59%),
+    linear-gradient(35deg, transparent 46%, rgba(24, 38, 31, 0.95) 47% 62%, transparent 63%),
+    linear-gradient(180deg, rgba(11, 18, 15, 0), rgba(8, 12, 10, 0.8));
+}
+
+.loader-scene::after {
+  position: absolute;
+  inset: 12px 10px 8px;
+  z-index: -1;
+  content: "";
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 76% 25%, rgba(231, 176, 93, 0.16), transparent 24%),
+    linear-gradient(180deg, rgba(38, 52, 45, 0.6), rgba(13, 18, 16, 0.9));
+  box-shadow: inset 0 0 28px rgba(251, 235, 194, 0.06);
+}
+
+.loader-bottle {
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  width: 38px;
+  height: 112px;
+  border: 1px solid rgba(202, 218, 196, 0.18);
+  border-radius: 10px 10px 16px 16px;
+  background:
+    linear-gradient(90deg, rgba(244, 232, 196, 0.12), transparent 38%),
+    linear-gradient(135deg, rgba(44, 83, 62, 0.95), rgba(8, 17, 13, 0.98));
+  box-shadow:
+    inset 8px 0 14px rgba(255, 255, 255, 0.08),
+    10px 18px 26px rgba(0, 0, 0, 0.28);
+  transform: rotate(-28deg);
+  transform-origin: 70% 78%;
+}
+
+.loader-bottle::before {
+  position: absolute;
+  left: 8px;
+  top: -24px;
+  width: 18px;
+  height: 34px;
+  content: "";
+  border-radius: 7px 7px 3px 3px;
+  background: linear-gradient(135deg, #385f49, #111b16);
+  box-shadow: inset 5px 0 8px rgba(255, 255, 255, 0.08);
+}
+
+.loader-bottle::after {
+  position: absolute;
+  left: 5px;
+  top: 34px;
+  width: 28px;
+  height: 32px;
+  content: "";
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(245, 207, 132, 0.18), rgba(165, 89, 34, 0.18)),
+    rgba(238, 220, 172, 0.08);
+}
+
+.loader-pour {
+  position: absolute;
+  left: 62px;
+  top: 72px;
+  width: 70px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #e5a447, #f4c36d);
+  box-shadow: 0 0 12px rgba(228, 152, 63, 0.34);
+  transform: rotate(24deg);
+  transform-origin: left center;
+  animation: pour-pulse 1.8s ease-in-out infinite;
+}
+
+.loader-glass {
+  position: absolute;
+  right: 22px;
+  bottom: 18px;
+  width: 86px;
+  height: 92px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 18px 18px 28px 28px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent 24% 75%, rgba(255, 255, 255, 0.12)),
+    rgba(251, 246, 232, 0.04);
+  box-shadow:
+    inset 0 0 18px rgba(255, 255, 255, 0.08),
+    0 20px 30px rgba(0, 0, 0, 0.32);
+  animation: glass-turn 2.8s ease-in-out infinite;
+}
+
+.loader-glass::after {
+  position: absolute;
+  left: 17px;
+  right: 17px;
+  bottom: -8px;
+  height: 12px;
+  content: "";
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.loader-liquid {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
+  height: 62%;
+  border-radius: 40% 40% 20px 20px;
+  background:
+    radial-gradient(circle at 70% 22%, rgba(255, 230, 150, 0.9), transparent 12%),
+    radial-gradient(circle at 28% 18%, rgba(255, 245, 188, 0.42), transparent 18%),
+    linear-gradient(180deg, #f1b65a, #a85b22 78%, #6f3518);
+  box-shadow: inset 0 8px 12px rgba(255, 239, 180, 0.25);
+  animation: liquid-fill 2.4s ease-in-out infinite;
+}
+
+.loader-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, 0.35), transparent 48%);
+  animation: shimmer 2.2s ease-in-out infinite;
+}
+
+@keyframes pour-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: rotate(24deg) scaleX(0.35);
+  }
+
+  35%,
+  75% {
+    opacity: 1;
+    transform: rotate(24deg) scaleX(1);
+  }
+}
+
+@keyframes liquid-fill {
+  0% {
+    height: 18%;
+  }
+
+  45%,
+  100% {
+    height: 62%;
+  }
+}
+
+@keyframes glass-turn {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0;
+    transform: translateX(-70%);
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(80%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-bottle,
+  .loader-pour,
+  .loader-glass,
+  .loader-liquid,
+  .loader-shine {
+    animation: none;
+  }
+
+  .loader-pour {
+    opacity: 0;
+  }
+}
