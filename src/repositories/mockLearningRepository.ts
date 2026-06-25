@@ -9,6 +9,7 @@ import type {
 import { getUnlockedAchievementIds } from "@/domain/achievements";
 
 const sessions = new Map<string, UserSession>();
+const xpEventKeys = new Set<string>();
 
 export function createMockLearningRepository(): LearningRepository {
   return {
@@ -39,6 +40,10 @@ export function createMockLearningRepository(): LearningRepository {
       }
     },
     async recordAnswer(input: RecordAnswerInput) {
+      const eventKey = `${input.userId}:answer:${input.activityId}`;
+      if (xpEventKeys.has(eventKey)) return;
+
+      xpEventKeys.add(eventKey);
       for (const session of sessions.values()) {
         if (session.userId === input.userId) {
           session.totalXp += input.xpDelta;

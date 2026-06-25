@@ -38,8 +38,14 @@ export function TastingNoteForm({
     event.preventDefault();
     setError(null);
 
+    const compactedNote = compactNote(note);
+    if (Object.keys(compactedNote).length === 0) {
+      setError("Добавьте хотя бы одно наблюдение.");
+      return;
+    }
+
     try {
-      await onSave(compactNote(note));
+      await onSave(compactedNote);
     } catch {
       setError("Не удалось сохранить заметку. Текст остался на месте, попробуйте ещё раз.");
     }

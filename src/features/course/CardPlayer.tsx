@@ -32,6 +32,10 @@ export function CardPlayer({
 }) {
   const [index, setIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
+  const [isSavingAnswer, setIsSavingAnswer] = useState(false);
+  const [answerError, setAnswerError] = useState<string | null>(null);
+  const [isCompletingChapter, setIsCompletingChapter] = useState(false);
+  const [completionError, setCompletionError] = useState<string | null>(null);
   const card = chapter.cards[index];
   const quiz = isQuiz(card) ? card : null;
   const isLast = index === chapter.cards.length - 1;
@@ -39,29 +43,54 @@ export function CardPlayer({
     quiz && selectedOptionId ? selectedOptionId === quiz.correctOptionId : false;
   const selectedXp = selectedOptionId ? calculateAnswerXp(selectedIsCorrect) : 0;
 
-  function selectOption(optionId: string) {
-    if (!quiz || selectedOptionId) return;
-
-    const isCorrect = optionId === quiz.correctOptionId;
-    setSelectedOptionId(optionId);
-    void Promise.resolve(
-      onAnswerSelected?.({
+  async function persistAnswer(optionId: string, quizCard: QuizCard) {
+    const isCorrect = optionId === quizCard.correctOptionId;
+    setIsSavingAnswer(true);
+    setAnswerError(null);
+    try {
+      await onAnswerSelected?.({
         chapterId: chapter.id,
-        activityId: quiz.id,
+        activityId: quizCard.id,
         answer: optionId,
         isCorrect,
         xpDelta: calculateAnswerXp(isCorrect),
-      }),
-    ).catch(() => undefined);
+      });
+    } catch {
+      setAnswerError("Не удалось сохранить ответ. Проверьте связь и попробуйте ещё раз.");
+    } finally {
+      setIsSavingAnswer(false);
+    }
   }
 
-  function next() {
+  function selectOption(optionId: string) {
+    if (!quiz || selectedOptionId || isSavingAnswer) return;
+
+    setSelectedOptionId(optionId);
+    void persistAnswer(optionId, quiz);
+  }
+
+  async function retryAnswerSave() {
+    if (!quiz || !selectedOptionId || isSavingAnswer) return;
+    await persistAnswer(selectedOptionId, quiz);
+  }
+
+  async function next() {
     if (isLast) {
-      void Promise.resolve(onCompleteChapter(chapter.id)).catch(() => undefined);
+      setIsCompletingChapter(true);
+      setCompletionError(null);
+      try {
+        await onCompleteChapter(chapter.id);
+      } catch {
+        setCompletionError("Не удалось сохранить прогресс. Проверьте связь и попробуйте ещё раз.");
+      } finally {
+        setIsCompletingChapter(false);
+      }
       return;
     }
 
     setSelectedOptionId(null);
+    setAnswerError(null);
+    setCompletionError(null);
     setIndex((current) => current + 1);
   }
 
@@ -114,6 +143,19 @@ export function CardPlayer({
                 {selectedIsCorrect ? quiz.successFeedback : quiz.errorFeedback}
               </p>
               <p className="mt-2 text-stone-300">{quiz.explanation}</p>
+              {answerError ? (
+                <div className="mt-3 grid gap-2">
+                  <p className="text-red-200">{answerError}</p>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => void retryAnswerSave()}
+                    disabled={isSavingAnswer}
+                  >
+                    {isSavingAnswer ? "Сохраняем..." : "Повторить сохранение"}
+                  </Button>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -125,11 +167,15 @@ export function CardPlayer({
 
       <Button
         className="mt-6 w-full"
-        onClick={next}
-        disabled={Boolean(quiz && !selectedOptionId)}
+        onClick={() => void next()}
+        disabled={Boolean(
+          (quiz && (!selectedOptionId || isSavingAnswer || answerError)) ||
+            isCompletingChapter,
+        )}
       >
-        {isLast ? "Завершить главу" : "Дальше"}
+        {isCompletingChapter ? "Сохраняем прогресс..." : isLast ? "Завершить главу" : "Дальше"}
       </Button>
+      {completionError ? <p className="mt-3 text-sm text-red-200">{completionError}</p> : null}
     </Card>
   );
 }

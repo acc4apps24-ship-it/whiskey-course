@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Chapter } from "@/content/courseTypes";
 import { course } from "@/content/course";
@@ -52,6 +52,74 @@ describe("CardPlayer", () => {
       isCorrect: true,
       xpDelta: 10,
     });
+  });
+
+  it("shows a retry path when answer persistence fails", async () => {
+    const onAnswerSelected = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(undefined);
+    render(
+      <CardPlayer
+        chapter={course.chapters[0]}
+        onAnswerSelected={onAnswerSelected}
+        onCompleteChapter={vi.fn()}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Дальше" }));
+    await userEvent.click(screen.getByRole("button", { name: "Дальше" }));
+    await userEvent.click(screen.getByRole("button", { name: "Миф" }));
+
+    expect(
+      await screen.findByText("Не удалось сохранить ответ. Проверьте связь и попробуйте ещё раз."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Дальше" })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Повторить сохранение" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Дальше" })).toBeEnabled();
+    });
+    expect(onAnswerSelected).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows a retry path when chapter completion persistence fails", async () => {
+    const chapter: Chapter = {
+      id: "summary-chapter",
+      title: "Финиш",
+      subtitle: "Summary",
+      durationMinutes: 1,
+      cards: [
+        {
+          id: "SUMMARY-01",
+          type: "summary",
+          title: "Итог",
+          body: "Глава завершена.",
+        },
+      ],
+    };
+    const onCompleteChapter = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(undefined);
+
+    render(<CardPlayer chapter={chapter} onCompleteChapter={onCompleteChapter} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Завершить главу" }));
+
+    expect(
+      await screen.findByText("Не удалось сохранить прогресс. Проверьте связь и попробуйте ещё раз."),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Завершить главу" }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Не удалось сохранить прогресс. Проверьте связь и попробуйте ещё раз."),
+      ).not.toBeInTheDocument();
+    });
+    expect(onCompleteChapter).toHaveBeenCalledTimes(2);
   });
 
   it("renders tasting notes for practice cards and saves drafts", async () => {
