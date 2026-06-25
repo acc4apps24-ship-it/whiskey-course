@@ -173,11 +173,13 @@ function AppContent() {
                       correctAnswers: result.correctAnswers,
                       xpDelta: result.xp,
                     });
-                    setFinalResult({ ...result, xp: saved.xpAwarded });
+                    const savedResult = { ...result, xp: saved.xpAwarded };
+                    setFinalResult(savedResult);
                     app.repository
                       .getLeaderboard(app.session.userId)
                       .then((entries) => setLeaderboard(entries ?? []))
                       .catch(() => undefined);
+                    return savedResult;
                   }}
                 />
               </div>

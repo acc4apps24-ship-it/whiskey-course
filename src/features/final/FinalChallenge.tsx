@@ -36,7 +36,9 @@ export function FinalChallenge({
 }: {
   summary?: FinalChallengeSummary;
   questions: FinalQuestion[];
-  onComplete: (result: FinalChallengeResult) => void | Promise<void>;
+  onComplete: (
+    result: FinalChallengeResult,
+  ) => void | FinalChallengeResult | Promise<void | FinalChallengeResult>;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completedResult, setCompletedResult] = useState<FinalChallengeResult | null>(
@@ -59,8 +61,8 @@ export function FinalChallenge({
     setIsCompleting(true);
     setError(null);
     try {
-      await onComplete(result);
-      setCompletedResult(result);
+      const savedResult = await onComplete(result);
+      setCompletedResult(savedResult ?? result);
     } catch {
       setError("Не удалось сохранить результат финала. Проверьте связь и попробуйте ещё раз.");
     } finally {

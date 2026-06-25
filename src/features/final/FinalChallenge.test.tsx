@@ -60,4 +60,24 @@ describe("FinalChallenge", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("Сравнить с друзьями")).not.toBeInTheDocument();
   });
+
+  it("shows the saved awarded XP returned by onComplete", async () => {
+    const onComplete = vi.fn().mockResolvedValue({ correctAnswers: 1, xp: 0 });
+    const question = course.finalChallenge.questions[0];
+    const correctOption = question.options.find(
+      (option) => option.id === question.correctOptionId,
+    );
+
+    render(
+      <FinalChallenge
+        questions={course.finalChallenge.questions.slice(0, 1)}
+        onComplete={onComplete}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: correctOption?.text }));
+    await userEvent.click(screen.getByRole("button", { name: "Завершить испытание" }));
+
+    expect(await screen.findByText("XP за финал: 0")).toBeInTheDocument();
+  });
 });
