@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppProvider, useAppState } from "@/app/AppProvider";
 import { BrandedLoader } from "@/components/BrandedLoader";
+import { Button } from "@/components/ui/button";
 import { course, getChapter } from "@/content/course";
+import { isFinalChallengeUnlocked } from "@/domain/progress";
 import { CardPlayer } from "@/features/course/CardPlayer";
 import { CourseMap } from "@/features/course/CourseMap";
+import { FinalChallenge } from "@/features/final/FinalChallenge";
 import { Leaderboard } from "@/features/leaderboard/Leaderboard";
 import { AgeGate } from "@/features/onboarding/AgeGate";
 import { NameGate } from "@/features/onboarding/NameGate";
@@ -12,6 +15,7 @@ import type { LeaderboardEntry } from "@/repositories/learningRepository";
 function AppContent() {
   const app = useAppState();
   const [activeChapterId, setActiveChapterId] = useState<string | null>(null);
+  const [isFinalChallengeOpen, setIsFinalChallengeOpen] = useState(false);
   const [locallyCompletedChapterIds, setLocallyCompletedChapterIds] = useState<
     string[]
   >([]);
@@ -26,6 +30,10 @@ function AppContent() {
         ]),
       ),
     [app.session?.completedChapterIds, locallyCompletedChapterIds],
+  );
+  const finalChallengeUnlocked = isFinalChallengeUnlocked(
+    completedChapterIds,
+    course.chapters.map((chapter) => chapter.id),
   );
 
   useEffect(() => {
@@ -110,11 +118,28 @@ function AppContent() {
             <p className="text-sm text-smoke">
               С возвращением, {app.session?.displayName}.
             </p>
-            <CourseMap
-              course={course}
-              completedChapterIds={completedChapterIds}
-              onOpenChapter={setActiveChapterId}
-            />
+            {isFinalChallengeOpen ? (
+              <FinalChallenge
+                questions={course.finalChallenge.questions}
+                onComplete={() => undefined}
+              />
+            ) : (
+              <>
+                <CourseMap
+                  course={course}
+                  completedChapterIds={completedChapterIds}
+                  onOpenChapter={(chapterId) => {
+                    setIsFinalChallengeOpen(false);
+                    setActiveChapterId(chapterId);
+                  }}
+                />
+                {finalChallengeUnlocked ? (
+                  <Button type="button" onClick={() => setIsFinalChallengeOpen(true)}>
+                    Открыть финальное испытание
+                  </Button>
+                ) : null}
+              </>
+            )}
             <Leaderboard entries={leaderboard} />
           </div>
         ) : null}

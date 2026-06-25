@@ -2,14 +2,40 @@ import { describe, expect, it } from "vitest";
 import { course } from "./course";
 
 describe("course content", () => {
-  it("ships an engine-first content slice with chapters 1 and 2 plus a final placeholder", () => {
+  it("contains all 7 chapters and the 20-question Final Challenge from the content spec", () => {
     expect(course.id).toBe("whisky-journey");
     expect(course.version).toBe("1.0");
     expect(course.chapters.map((chapter) => chapter.id)).toEqual([
       "chapter-1-first-dram",
       "chapter-2-speyside",
+      "chapter-3-highlands",
+      "chapter-4-islay",
+      "chapter-5-casks",
+      "chapter-6-tasting",
+      "chapter-7-whisky-detective",
     ]);
-    expect(course.finalChallenge.questions).toHaveLength(2);
+    expect(course.finalChallenge.questions.map((question) => question.id)).toEqual([
+      "FINAL-Q01",
+      "FINAL-Q02",
+      "FINAL-Q03",
+      "FINAL-Q04",
+      "FINAL-Q05",
+      "FINAL-Q06",
+      "FINAL-Q07",
+      "FINAL-Q08",
+      "FINAL-Q09",
+      "FINAL-Q10",
+      "FINAL-Q11",
+      "FINAL-Q12",
+      "FINAL-Q13",
+      "FINAL-Q14",
+      "FINAL-Q15",
+      "FINAL-Q16",
+      "FINAL-Q17",
+      "FINAL-Q18",
+      "FINAL-Q19",
+      "FINAL-Q20",
+    ]);
   });
 
   it("keeps every card in an allowed type and every quiz answer explainable", () => {

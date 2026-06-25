@@ -2,19 +2,61 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Chapter } from "@/content/courseTypes";
-import { course } from "@/content/course";
 import { CardPlayer } from "./CardPlayer";
 
 afterEach(() => {
   cleanup();
 });
 
+const quizChapter: Chapter = {
+  id: "chapter-1-first-dram",
+  title: "Первый драм",
+  subtitle: "First Dram",
+  durationMinutes: 7,
+  cards: [
+    {
+      id: "INTRO-01",
+      type: "content",
+      title: "Старт",
+      body: "Начинаем путь.",
+    },
+    {
+      id: "INTRO-02",
+      type: "content",
+      title: "Single Malt",
+      body: "Готовимся к вопросу.",
+    },
+    {
+      id: "CH1-Q01",
+      type: "quiz-true-false",
+      title: "Правда или миф?",
+      body: "Односолодовый виски (Single Malt) всегда сделан из одной бочки.",
+      options: [
+        { id: "true", text: "Правда" },
+        { id: "false", text: "Миф" },
+      ],
+      correctOptionId: "false",
+      successFeedback: "Верно. Single Malt означает с одной винокурни.",
+      errorFeedback: "Почти, но нет.",
+      explanation:
+        "Single Malt означает одну винокурню и соложеный ячмень, а не одну конкретную бочку.",
+      xp: 10,
+    },
+    {
+      id: "SUMMARY-01",
+      type: "summary",
+      title: "Итог",
+      body: "Глава завершена.",
+    },
+  ],
+};
+
 describe("CardPlayer", () => {
   it("does not reveal quiz answer before selection and shows explanation after answer", async () => {
     const onCompleteChapter = vi.fn();
     render(
       <CardPlayer
-        chapter={course.chapters[0]}
+        chapter={quizChapter}
         onCompleteChapter={onCompleteChapter}
       />,
     );
@@ -33,7 +75,7 @@ describe("CardPlayer", () => {
     const onAnswerSelected = vi.fn();
     render(
       <CardPlayer
-        chapter={course.chapters[0]}
+        chapter={quizChapter}
         onAnswerSelected={onAnswerSelected}
         onCompleteChapter={vi.fn()}
       />,
@@ -61,7 +103,7 @@ describe("CardPlayer", () => {
       .mockResolvedValueOnce(undefined);
     render(
       <CardPlayer
-        chapter={course.chapters[0]}
+        chapter={quizChapter}
         onAnswerSelected={onAnswerSelected}
         onCompleteChapter={vi.fn()}
       />,
