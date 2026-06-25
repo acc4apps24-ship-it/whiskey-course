@@ -22,6 +22,7 @@ function AppContent() {
   >([]);
   const [localXp, setLocalXp] = useState(0);
   const locallyRecordedAnswerIdsRef = useRef(new Set<string>());
+  const leaderboardRequestIdRef = useRef(0);
   const [finalResult, setFinalResult] = useState<{
     correctAnswers: number;
     xp: number;
@@ -63,28 +64,36 @@ function AppContent() {
       }
     : undefined;
 
-  useEffect(() => {
+  async function refreshLeaderboardForCurrentSession() {
     if (!app.session) {
+      leaderboardRequestIdRef.current += 1;
       setLeaderboard([]);
-      return;
+      return [];
     }
 
-    let isMounted = true;
+    const requestId = leaderboardRequestIdRef.current + 1;
+    leaderboardRequestIdRef.current = requestId;
 
-    Promise.resolve(app.repository.getLeaderboard(app.session.userId))
-      .then((entries) => {
-        if (isMounted) {
-          setLeaderboard(entries ?? []);
-        }
-      })
-      .catch(() => {
-        if (isMounted) {
-          setLeaderboard([]);
-        }
-      });
+    try {
+      const entries = await app.repository.getLeaderboard(app.session.userId);
+      const safeEntries = entries ?? [];
+      if (leaderboardRequestIdRef.current === requestId) {
+        setLeaderboard(safeEntries);
+      }
+      return safeEntries;
+    } catch {
+      if (leaderboardRequestIdRef.current === requestId) {
+        setLeaderboard([]);
+      }
+      return [];
+    }
+  }
+
+  useEffect(() => {
+    refreshLeaderboardForCurrentSession().catch(() => undefined);
 
     return () => {
-      isMounted = false;
+      leaderboardRequestIdRef.current += 1;
     };
   }, [app.repository, app.session]);
 
@@ -175,12 +184,7 @@ function AppContent() {
                       xpDelta: result.xp,
                     });
                     const savedResult = { ...result, xp: saved.xpAwarded };
-                    try {
-                      const entries = await app.repository.getLeaderboard(app.session.userId);
-                      setLeaderboard(entries ?? []);
-                    } catch {
-                      setLeaderboard([]);
-                    }
+                    await refreshLeaderboardForCurrentSession();
                     setFinalResult(savedResult);
                     return savedResult;
                   }}

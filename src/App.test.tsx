@@ -113,4 +113,64 @@ describe("App final challenge", () => {
     expect(screen.getByText("Место в leaderboard: #2")).toBeInTheDocument();
     expect(screen.getByText(/Мастер виски \(Whisky Master\)/)).toBeInTheDocument();
   });
+
+  it("ignores an older leaderboard response after final completion refreshes rank", async () => {
+    const user = userEvent.setup();
+    let resolveInitialLeaderboard: (entries: unknown[]) => void = () => {};
+    const initialLeaderboard = new Promise((resolve) => {
+      resolveInitialLeaderboard = resolve;
+    });
+    mocks.repository.getLeaderboard
+      .mockReturnValueOnce(initialLeaderboard)
+      .mockResolvedValueOnce([
+        {
+          rank: 2,
+          userId: session.userId,
+          displayName: session.displayName,
+          totalXp: 900,
+          completedChapters: completedChapterIds.length,
+          achievements: [...session.achievements, "ACH-005"],
+          isCurrentUser: true,
+        },
+      ]);
+
+    render(<App />);
+
+    await user.click(await screen.findByRole("button", { name: "Открыть финальное испытание" }));
+
+    for (const question of course.finalChallenge.questions) {
+      const option = question.options.find(
+        (candidate) => candidate.id === question.correctOptionId,
+      );
+      const questionSection = screen
+        .getByRole("heading", { name: question.question })
+        .closest("section");
+
+      if (!option || !questionSection) throw new Error(`Missing test fixture for ${question.id}`);
+
+      await user.click(within(questionSection).getByRole("button", { name: option.text }));
+    }
+
+    await user.click(screen.getByRole("button", { name: "Завершить испытание" }));
+
+    expect(await screen.findByText("Место в leaderboard: #2")).toBeInTheDocument();
+
+    resolveInitialLeaderboard([
+      {
+        rank: 7,
+        userId: session.userId,
+        displayName: session.displayName,
+        totalXp: 700,
+        completedChapters: completedChapterIds.length,
+        achievements: session.achievements,
+        isCurrentUser: true,
+      },
+    ]);
+
+    await waitFor(() => {
+      expect(screen.getByText("Место в leaderboard: #2")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Место в leaderboard: #7")).not.toBeInTheDocument();
+    expect(screen.getByText("Общий XP: 900")).toBeInTheDocument();
+  });
 });
