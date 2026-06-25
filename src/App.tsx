@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppProvider, useAppState } from "@/app/AppProvider";
 import { BrandedLoader } from "@/components/BrandedLoader";
 import { course, getChapter } from "@/content/course";
 import { CardPlayer } from "@/features/course/CardPlayer";
 import { CourseMap } from "@/features/course/CourseMap";
+import { Leaderboard } from "@/features/leaderboard/Leaderboard";
 import { AgeGate } from "@/features/onboarding/AgeGate";
 import { NameGate } from "@/features/onboarding/NameGate";
+import type { LeaderboardEntry } from "@/repositories/learningRepository";
 
 function AppContent() {
   const app = useAppState();
@@ -13,6 +15,7 @@ function AppContent() {
   const [locallyCompletedChapterIds, setLocallyCompletedChapterIds] = useState<
     string[]
   >([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const activeChapter = activeChapterId ? getChapter(activeChapterId) : undefined;
   const completedChapterIds = useMemo(
     () =>
@@ -24,6 +27,31 @@ function AppContent() {
       ),
     [app.session?.completedChapterIds, locallyCompletedChapterIds],
   );
+
+  useEffect(() => {
+    if (!app.session) {
+      setLeaderboard([]);
+      return;
+    }
+
+    let isMounted = true;
+
+    Promise.resolve(app.repository.getLeaderboard(app.session.userId))
+      .then((entries) => {
+        if (isMounted) {
+          setLeaderboard(entries ?? []);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setLeaderboard([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [app.repository, app.session]);
 
   return (
     <main className="min-h-[100svh] px-5 py-6 safe-bottom">
@@ -87,6 +115,7 @@ function AppContent() {
               completedChapterIds={completedChapterIds}
               onOpenChapter={setActiveChapterId}
             />
+            <Leaderboard entries={leaderboard} />
           </div>
         ) : null}
       </section>
