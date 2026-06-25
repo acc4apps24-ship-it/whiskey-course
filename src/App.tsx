@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { course, getChapter } from "@/content/course";
 import { getUnlockedAchievementIds } from "@/domain/achievements";
 import { isFinalChallengeUnlocked } from "@/domain/progress";
-import { calculateChapterCompletionXp } from "@/domain/xp";
 import { CardPlayer } from "@/features/course/CardPlayer";
 import { CourseMap } from "@/features/course/CourseMap";
 import { FinalChallenge } from "@/features/final/FinalChallenge";
@@ -46,6 +45,9 @@ function AppContent() {
   const currentLeaderboardEntry = leaderboard.find(
     (entry) => entry.userId === app.session?.userId,
   );
+  const achievementTitleById = new Map<string, string>(
+    course.achievements.map((achievement) => [achievement.id, achievement.title]),
+  );
   const finalSummary = finalResult
     ? {
         totalXp: (app.session?.totalXp ?? 0) + localXp + finalResult.xp,
@@ -54,7 +56,7 @@ function AppContent() {
             ...(app.session?.achievements ?? []),
             ...getUnlockedAchievementIds(completedChapterIds, true),
           ]),
-        ),
+        ).map((achievementId) => achievementTitleById.get(achievementId) ?? achievementId),
         leaderboardRank: currentLeaderboardEntry?.rank,
       }
     : undefined;
@@ -118,8 +120,9 @@ function AppContent() {
             }}
             onCompleteChapter={async (chapterId) => {
               const alreadyCompleted = completedChapterIds.includes(chapterId);
+              let progressResult = { xpAwarded: 0 };
               if (app.session) {
-                await app.repository.saveProgress({
+                progressResult = await app.repository.saveProgress({
                   userId: app.session.userId,
                   chapterId,
                   status: "completed",
@@ -129,11 +132,7 @@ function AppContent() {
                 Array.from(new Set([...current, chapterId])),
               );
               if (!alreadyCompleted) {
-                setLocalXp(
-                  (current) =>
-                    current +
-                    calculateChapterCompletionXp({ completed: true, perfect: false }),
-                );
+                setLocalXp((current) => current + progressResult.xpAwarded);
               }
               setActiveChapterId(null);
             }}

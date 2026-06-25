@@ -8,6 +8,7 @@ import type {
   UserSession,
 } from "./learningRepository";
 import { getUnlockedAchievementIds } from "@/domain/achievements";
+import { calculateChapterCompletionXp } from "@/domain/xp";
 
 const sessions = new Map<string, UserSession>();
 const xpEventKeys = new Set<string>();
@@ -34,15 +35,25 @@ export function createMockLearningRepository(): LearningRepository {
       return session;
     },
     async saveProgress(input: SaveProgressInput) {
+      let xpAwarded = 0;
       for (const session of sessions.values()) {
         if (session.userId === input.userId && input.status === "completed") {
+          const alreadyCompleted = session.completedChapterIds.includes(input.chapterId);
           session.completedChapterIds = Array.from(new Set([...session.completedChapterIds, input.chapterId]));
+          if (!alreadyCompleted) {
+            xpAwarded = calculateChapterCompletionXp({
+              completed: true,
+              perfect: false,
+            });
+            session.totalXp += xpAwarded;
+          }
           session.achievements = getUnlockedAchievementIds(
             session.completedChapterIds,
             finalCompletedUserIds.has(session.userId),
           );
         }
       }
+      return { xpAwarded };
     },
     async recordAnswer(input: RecordAnswerInput) {
       const eventKey = `${input.userId}:answer:${input.activityId}`;

@@ -61,7 +61,7 @@ export type TastingNoteInput = {
 export interface LearningRepository {
   getSession(sessionId: string): Promise<UserSession | null>;
   createSession(displayName: string): Promise<UserSession>;
-  saveProgress(input: SaveProgressInput): Promise<void>;
+  saveProgress(input: SaveProgressInput): Promise<XpAwardResult>;
   recordAnswer(input: RecordAnswerInput): Promise<XpAwardResult>;
   recordFinalResult(input: RecordFinalResultInput): Promise<XpAwardResult>;
   saveTastingNote(input: TastingNoteInput): Promise<void>;

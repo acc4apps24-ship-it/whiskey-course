@@ -2,6 +2,29 @@ import { describe, expect, it } from "vitest";
 import { createMockLearningRepository } from "./mockLearningRepository";
 
 describe("createMockLearningRepository", () => {
+  it("awards chapter completion XP once", async () => {
+    const repository = createMockLearningRepository();
+    const session = await repository.createSession("Ada");
+    const progress = {
+      userId: session.userId,
+      chapterId: "chapter-1-first-dram",
+      status: "completed" as const,
+    };
+
+    await expect(repository.saveProgress(progress)).resolves.toEqual({
+      xpAwarded: 100,
+    });
+    await expect(repository.saveProgress(progress)).resolves.toEqual({
+      xpAwarded: 0,
+    });
+
+    const leaderboard = await repository.getLeaderboard(session.userId);
+    expect(leaderboard[0]).toMatchObject({
+      userId: session.userId,
+      totalXp: 100,
+    });
+  });
+
   it("deduplicates answer XP by user and activity like Supabase", async () => {
     const repository = createMockLearningRepository();
     const session = await repository.createSession("Ada");
@@ -19,7 +42,8 @@ describe("createMockLearningRepository", () => {
     await expect(repository.recordAnswer(answer)).resolves.toEqual({ xpAwarded: 0 });
 
     const leaderboard = await repository.getLeaderboard(session.userId);
-    expect(leaderboard[0]).toMatchObject({
+    const currentEntry = leaderboard.find((entry) => entry.userId === session.userId);
+    expect(currentEntry).toMatchObject({
       userId: session.userId,
       totalXp: 10,
     });

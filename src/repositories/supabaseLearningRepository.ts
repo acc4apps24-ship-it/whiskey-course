@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getUnlockedAchievementIds } from "@/domain/achievements";
+import { calculateChapterCompletionXp } from "@/domain/xp";
 import type {
   LeaderboardEntry,
   LearningRepository,
@@ -142,6 +143,21 @@ export function createSupabaseLearningRepository(client: SupabaseClient): Learni
       );
 
       if (error) throw error;
+
+      if (input.status !== "completed") {
+        return { xpAwarded: 0 };
+      }
+
+      return recordXpEvent({
+        userId: input.userId,
+        eventType: "chapter-completion",
+        sourceId: input.chapterId,
+        xpDelta: calculateChapterCompletionXp({
+          completed: true,
+          perfect: false,
+        }),
+        reason: "Chapter completed",
+      });
     },
     async recordAnswer(input: RecordAnswerInput) {
       const { error: attemptError } = await client.from("wj_quiz_attempts").insert({
