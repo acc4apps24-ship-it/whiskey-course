@@ -40,8 +40,18 @@ describe("course content", () => {
   });
 
   it("contains exact achievement ids from the content spec for the first slice", () => {
-    expect(course.achievements.map((achievement) => achievement.id)).toContain("ACH-001");
-    expect(course.achievements.map((achievement) => achievement.id)).toContain("ACH-002");
-    expect(course.achievements.map((achievement) => achievement.id)).toContain("ACH-005");
+    expect(course.achievements.map((achievement) => achievement.id)).toEqual([
+      "ACH-001",
+      "ACH-002",
+      "ACH-003",
+      "ACH-004",
+      "ACH-005",
+    ]);
+  });
+
+  it("keeps ACH-005 condition aligned with the content spec", () => {
+    expect(course.achievements.find((achievement) => achievement.id === "ACH-005")?.condition).toBe(
+      "Завершен весь курс",
+    );
   });
 });

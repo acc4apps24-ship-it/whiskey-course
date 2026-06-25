@@ -32,7 +32,7 @@ export const course: Course = {
     {
       id: "ACH-005",
       title: "Мастер виски (Whisky Master)",
-      condition: "Завершён весь курс",
+      condition: "Завершен весь курс",
       screenText: "Курс пройден. Можно обсуждать виски с уверенностью и без снобизма.",
     },
   ],
