@@ -6,6 +6,7 @@ import type {
   TastingNoteInput,
   UserSession,
 } from "./learningRepository";
+import { getUnlockedAchievementIds } from "@/domain/achievements";
 
 const sessions = new Map<string, UserSession>();
 
@@ -33,6 +34,7 @@ export function createMockLearningRepository(): LearningRepository {
       for (const session of sessions.values()) {
         if (session.userId === input.userId && input.status === "completed") {
           session.completedChapterIds = Array.from(new Set([...session.completedChapterIds, input.chapterId]));
+          session.achievements = getUnlockedAchievementIds(session.completedChapterIds, false);
         }
       }
     },

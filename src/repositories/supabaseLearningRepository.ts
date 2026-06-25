@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { getUnlockedAchievementIds } from "@/domain/achievements";
 import type {
   LeaderboardEntry,
   LearningRepository,
@@ -24,21 +25,31 @@ type LeaderboardRow = {
 
 export function createSupabaseLearningRepository(client: SupabaseClient): LearningRepository {
   async function buildSession(row: UserRow): Promise<UserSession> {
-    const { data: leaderboard, error } = await client
+    const { data: leaderboard, error: leaderboardError } = await client
       .from("wj_leaderboard")
       .select("total_xp")
       .eq("user_id", row.id)
       .maybeSingle<Pick<LeaderboardRow, "total_xp">>();
 
-    if (error) throw error;
+    if (leaderboardError) throw leaderboardError;
+
+    const { data: progress, error: progressError } = await client
+      .from("wj_progress")
+      .select("chapter_id")
+      .eq("user_id", row.id)
+      .eq("status", "completed");
+
+    if (progressError) throw progressError;
+
+    const completedChapterIds = (progress ?? []).map((item) => item.chapter_id as string);
 
     return {
       userId: row.id,
       sessionId: row.session_id,
       displayName: row.display_name,
       totalXp: leaderboard?.total_xp ?? 0,
-      completedChapterIds: [],
-      achievements: [],
+      completedChapterIds,
+      achievements: getUnlockedAchievementIds(completedChapterIds, false),
     };
   }
 

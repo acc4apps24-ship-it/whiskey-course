@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Chapter, CourseCard, QuizCard } from "@/content/courseTypes";
 import { calculateAnswerXp } from "@/domain/xp";
+import { TastingNoteForm, type TastingNoteDraft } from "./TastingNoteForm";
 
 function isQuiz(card: CourseCard): card is QuizCard {
   return (
@@ -14,10 +15,20 @@ function isQuiz(card: CourseCard): card is QuizCard {
 
 export function CardPlayer({
   chapter,
+  onAnswerSelected,
   onCompleteChapter,
+  onSaveTastingNote,
 }: {
   chapter: Chapter;
-  onCompleteChapter: (chapterId: string) => void;
+  onAnswerSelected?: (answer: {
+    chapterId: string;
+    activityId: string;
+    answer: string;
+    isCorrect: boolean;
+    xpDelta: number;
+  }) => void | Promise<void>;
+  onCompleteChapter: (chapterId: string) => void | Promise<void>;
+  onSaveTastingNote?: (note: TastingNoteDraft) => Promise<void>;
 }) {
   const [index, setIndex] = useState(0);
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
@@ -28,9 +39,25 @@ export function CardPlayer({
     quiz && selectedOptionId ? selectedOptionId === quiz.correctOptionId : false;
   const selectedXp = selectedOptionId ? calculateAnswerXp(selectedIsCorrect) : 0;
 
+  function selectOption(optionId: string) {
+    if (!quiz || selectedOptionId) return;
+
+    const isCorrect = optionId === quiz.correctOptionId;
+    setSelectedOptionId(optionId);
+    void Promise.resolve(
+      onAnswerSelected?.({
+        chapterId: chapter.id,
+        activityId: quiz.id,
+        answer: optionId,
+        isCorrect,
+        xpDelta: calculateAnswerXp(isCorrect),
+      }),
+    ).catch(() => undefined);
+  }
+
   function next() {
     if (isLast) {
-      onCompleteChapter(chapter.id);
+      void Promise.resolve(onCompleteChapter(chapter.id)).catch(() => undefined);
       return;
     }
 
@@ -69,7 +96,8 @@ export function CardPlayer({
                     ? "border border-amber/50 bg-amber/15 text-foreground"
                     : "border border-white/10"
                 }
-                onClick={() => setSelectedOptionId(option.id)}
+                disabled={Boolean(selectedOptionId)}
+                onClick={() => selectOption(option.id)}
               >
                 {option.text}
               </Button>
@@ -89,6 +117,10 @@ export function CardPlayer({
             </div>
           ) : null}
         </div>
+      ) : null}
+
+      {card.type === "practice" && onSaveTastingNote ? (
+        <TastingNoteForm onSave={onSaveTastingNote} />
       ) : null}
 
       <Button

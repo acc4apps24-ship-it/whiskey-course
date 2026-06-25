@@ -45,11 +45,35 @@ function AppContent() {
         {app.screen === "course" && activeChapter ? (
           <CardPlayer
             chapter={activeChapter}
-            onCompleteChapter={(chapterId) => {
+            onAnswerSelected={async (answer) => {
+              if (!app.session) return;
+
+              await app.repository.recordAnswer({
+                userId: app.session.userId,
+                ...answer,
+              });
+            }}
+            onCompleteChapter={async (chapterId) => {
+              if (app.session) {
+                await app.repository.saveProgress({
+                  userId: app.session.userId,
+                  chapterId,
+                  status: "completed",
+                });
+              }
               setLocallyCompletedChapterIds((current) =>
                 Array.from(new Set([...current, chapterId])),
               );
               setActiveChapterId(null);
+            }}
+            onSaveTastingNote={async (note) => {
+              if (!app.session) return;
+
+              await app.repository.saveTastingNote({
+                userId: app.session.userId,
+                chapterId: activeChapter.id,
+                ...note,
+              });
             }}
           />
         ) : null}

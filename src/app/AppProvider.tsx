@@ -21,6 +21,7 @@ import {
 import type { AppState } from "./appState";
 
 type AppContextValue = AppState & {
+  repository: LearningRepository;
   acceptAgeGate: () => void;
   createSession: (displayName: string) => Promise<void>;
 };
@@ -139,6 +140,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const value: AppContextValue = {
     ...state,
+    repository,
     acceptAgeGate,
     createSession,
   };
