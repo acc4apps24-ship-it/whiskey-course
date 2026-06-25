@@ -2,6 +2,7 @@ import type {
   LeaderboardEntry,
   LearningRepository,
   RecordAnswerInput,
+  RecordFinalResultInput,
   SaveProgressInput,
   TastingNoteInput,
   UserSession,
@@ -10,6 +11,7 @@ import { getUnlockedAchievementIds } from "@/domain/achievements";
 
 const sessions = new Map<string, UserSession>();
 const xpEventKeys = new Set<string>();
+const finalCompletedUserIds = new Set<string>();
 
 export function createMockLearningRepository(): LearningRepository {
   return {
@@ -35,7 +37,10 @@ export function createMockLearningRepository(): LearningRepository {
       for (const session of sessions.values()) {
         if (session.userId === input.userId && input.status === "completed") {
           session.completedChapterIds = Array.from(new Set([...session.completedChapterIds, input.chapterId]));
-          session.achievements = getUnlockedAchievementIds(session.completedChapterIds, false);
+          session.achievements = getUnlockedAchievementIds(
+            session.completedChapterIds,
+            finalCompletedUserIds.has(session.userId),
+          );
         }
       }
     },
@@ -47,6 +52,19 @@ export function createMockLearningRepository(): LearningRepository {
       for (const session of sessions.values()) {
         if (session.userId === input.userId) {
           session.totalXp += input.xpDelta;
+        }
+      }
+    },
+    async recordFinalResult(input: RecordFinalResultInput) {
+      const eventKey = `${input.userId}:final:final-challenge`;
+      if (xpEventKeys.has(eventKey)) return;
+
+      xpEventKeys.add(eventKey);
+      finalCompletedUserIds.add(input.userId);
+      for (const session of sessions.values()) {
+        if (session.userId === input.userId) {
+          session.totalXp += input.xpDelta;
+          session.achievements = getUnlockedAchievementIds(session.completedChapterIds, true);
         }
       }
     },

@@ -28,12 +28,14 @@ export function FinalChallenge({
   onComplete,
 }: {
   questions: FinalQuestion[];
-  onComplete: (result: FinalChallengeResult) => void;
+  onComplete: (result: FinalChallengeResult) => void | Promise<void>;
 }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completedResult, setCompletedResult] = useState<FinalChallengeResult | null>(
     null,
   );
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const answeredCount = Object.keys(answers).length;
   const correctAnswers = questions.filter(
     (question) => answers[question.id] === question.correctOptionId,
@@ -44,10 +46,18 @@ export function FinalChallenge({
     setAnswers((current) => ({ ...current, [questionId]: optionId }));
   }
 
-  function finish() {
+  async function finish() {
     const result = { correctAnswers, xp };
-    setCompletedResult(result);
-    onComplete(result);
+    setIsCompleting(true);
+    setError(null);
+    try {
+      await onComplete(result);
+      setCompletedResult(result);
+    } catch {
+      setError("Не удалось сохранить результат финала. Проверьте связь и попробуйте ещё раз.");
+    } finally {
+      setIsCompleting(false);
+    }
   }
 
   if (completedResult) {
@@ -140,11 +150,12 @@ export function FinalChallenge({
       <Button
         type="button"
         className="mt-6 w-full"
-        disabled={answeredCount < questions.length}
-        onClick={finish}
+        disabled={answeredCount < questions.length || isCompleting}
+        onClick={() => void finish()}
       >
-        Завершить испытание
+        {isCompleting ? "Сохраняем результат..." : "Завершить испытание"}
       </Button>
+      {error ? <p className="mt-3 text-sm text-red-200">{error}</p> : null}
     </Card>
   );
 }

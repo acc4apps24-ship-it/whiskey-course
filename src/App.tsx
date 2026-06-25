@@ -119,10 +119,29 @@ function AppContent() {
               С возвращением, {app.session?.displayName}.
             </p>
             {isFinalChallengeOpen ? (
-              <FinalChallenge
-                questions={course.finalChallenge.questions}
-                onComplete={() => undefined}
-              />
+              <div className="grid gap-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsFinalChallengeOpen(false)}
+                >
+                  Вернуться к карте курса
+                </Button>
+                <FinalChallenge
+                  questions={course.finalChallenge.questions}
+                  onComplete={async (result) => {
+                    if (!app.session) return;
+
+                    await app.repository.recordFinalResult({
+                      userId: app.session.userId,
+                      correctAnswers: result.correctAnswers,
+                      xpDelta: result.xp,
+                    });
+                    const entries = await app.repository.getLeaderboard(app.session.userId);
+                    setLeaderboard(entries ?? []);
+                  }}
+                />
+              </div>
             ) : (
               <>
                 <CourseMap

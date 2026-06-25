@@ -24,4 +24,29 @@ describe("createMockLearningRepository", () => {
       totalXp: 10,
     });
   });
+
+  it("records final result XP once and unlocks the final achievement", async () => {
+    const repository = createMockLearningRepository();
+    const session = await repository.createSession("Ada");
+
+    await repository.recordFinalResult({
+      userId: session.userId,
+      correctAnswers: 18,
+      xpDelta: 180,
+    });
+    await repository.recordFinalResult({
+      userId: session.userId,
+      correctAnswers: 18,
+      xpDelta: 180,
+    });
+
+    const restored = await repository.getSession(session.sessionId);
+    const leaderboard = await repository.getLeaderboard(session.userId);
+
+    expect(restored?.achievements).toContain("ACH-005");
+    expect(leaderboard[0]).toMatchObject({
+      userId: session.userId,
+      totalXp: 180,
+    });
+  });
 });

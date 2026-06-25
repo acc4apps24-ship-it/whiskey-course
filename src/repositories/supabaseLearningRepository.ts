@@ -5,6 +5,7 @@ import type {
   LeaderboardEntry,
   LearningRepository,
   RecordAnswerInput,
+  RecordFinalResultInput,
   SaveProgressInput,
   TastingNoteInput,
   UserSession,
@@ -41,7 +42,18 @@ export function createSupabaseLearningRepository(client: SupabaseClient): Learni
 
     if (progressError) throw progressError;
 
+    const { data: finalEvent, error: finalEventError } = await client
+      .from("wj_xp_events")
+      .select("id")
+      .eq("user_id", row.id)
+      .eq("event_type", "final")
+      .eq("source_id", "final-challenge")
+      .maybeSingle<{ id: string }>();
+
+    if (finalEventError) throw finalEventError;
+
     const completedChapterIds = (progress ?? []).map((item) => item.chapter_id as string);
+    const finalCompleted = Boolean(finalEvent);
 
     return {
       userId: row.id,
@@ -49,7 +61,7 @@ export function createSupabaseLearningRepository(client: SupabaseClient): Learni
       displayName: row.display_name,
       totalXp: leaderboard?.total_xp ?? 0,
       completedChapterIds,
-      achievements: getUnlockedAchievementIds(completedChapterIds, false),
+      achievements: getUnlockedAchievementIds(completedChapterIds, finalCompleted),
     };
   }
 
@@ -115,6 +127,20 @@ export function createSupabaseLearningRepository(client: SupabaseClient): Learni
       );
 
       if (xpError) throw xpError;
+    },
+    async recordFinalResult(input: RecordFinalResultInput) {
+      const { error } = await client.from("wj_xp_events").upsert(
+        {
+          user_id: input.userId,
+          event_type: "final",
+          source_id: "final-challenge",
+          xp_delta: input.xpDelta,
+          reason: `Final challenge: ${input.correctAnswers} correct answers`,
+        },
+        { onConflict: "user_id,event_type,source_id", ignoreDuplicates: true },
+      );
+
+      if (error) throw error;
     },
     async saveTastingNote(input: TastingNoteInput) {
       const { error } = await client.from("wj_tasting_notes").insert({
