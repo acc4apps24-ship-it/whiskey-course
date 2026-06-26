@@ -42,6 +42,137 @@ textarea {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
+.loader-shell {
+  width: min(100%, 390px);
+}
+
+.loader-rive-stage {
+  position: relative;
+  width: min(100%, 390px);
+  aspect-ratio: 39 / 56;
+  overflow: hidden;
+  border: 1px solid rgba(201, 121, 20, 0.34);
+  border-radius: 8px;
+  background: #080a09;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.5),
+    inset 0 0 44px rgba(229, 178, 74, 0.08);
+}
+
+.loader-poster {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 64% 26%, rgba(201, 121, 20, 0.2), transparent 22%),
+    radial-gradient(circle at 80% 32%, rgba(248, 238, 217, 0.07), transparent 9%),
+    #080a09;
+}
+
+.loader-poster-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.loader-bokeh {
+  position: absolute;
+  border-radius: 999px;
+  background: #c97914;
+  filter: blur(12px);
+  opacity: 0.16;
+}
+
+.loader-bokeh-one {
+  top: 13%;
+  right: 16%;
+  width: 54px;
+  height: 54px;
+}
+
+.loader-bokeh-two {
+  top: 24%;
+  right: 30%;
+  width: 28px;
+  height: 28px;
+}
+
+.loader-bottle-vintage {
+  transform-origin: 220px 65px;
+}
+
+.loader-pour-vintage {
+  stroke-dasharray: 190;
+  stroke-dashoffset: 190;
+  animation: vintage-pour 4s ease-in-out infinite;
+}
+
+.loader-pour-thin {
+  stroke-dasharray: 180;
+  stroke-dashoffset: 180;
+  animation: vintage-pour 4s ease-in-out 0.16s infinite;
+}
+
+.loader-liquid-wave {
+  animation: vintage-liquid 4s ease-in-out infinite;
+}
+
+.loader-glass-glint {
+  opacity: 0;
+  animation: vintage-glint 4s ease-in-out infinite;
+}
+
+.loader-glass-glint-delayed {
+  opacity: 0;
+  animation: vintage-glint 4s ease-in-out 1.8s infinite;
+}
+
+@keyframes vintage-pour {
+  0% {
+    stroke-dashoffset: 190;
+    opacity: 0;
+  }
+
+  16%,
+  72% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+
+  90%,
+  100% {
+    stroke-dashoffset: -130;
+    opacity: 0;
+  }
+}
+
+@keyframes vintage-liquid {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  48% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes vintage-glint {
+  0%,
+  58%,
+  100% {
+    opacity: 0;
+  }
+
+  66% {
+    opacity: 0.92;
+  }
+
+  74% {
+    opacity: 0;
+  }
+}
+
 .loader-scene {
   position: relative;
   isolation: isolate;
@@ -235,6 +366,11 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loader-pour-vintage,
+  .loader-pour-thin,
+  .loader-liquid-wave,
+  .loader-glass-glint,
+  .loader-glass-glint-delayed,
   .loader-bottle,
   .loader-pour,
   .loader-glass,
