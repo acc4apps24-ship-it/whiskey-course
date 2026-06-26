@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { Chapter, CourseCard, QuizCard } from "@/content/courseTypes";
 import { calculateAnswerXp } from "@/domain/xp";
+import { CardIllustration, getCardVisual } from "./cardVisuals";
 import { TastingNoteForm, type TastingNoteDraft } from "./TastingNoteForm";
 
 function isQuiz(card: CourseCard): card is QuizCard {
@@ -10,6 +11,32 @@ function isQuiz(card: CourseCard): card is QuizCard {
     card.type === "quiz-single" ||
     card.type === "quiz-true-false" ||
     card.type === "quiz-match"
+  );
+}
+
+function splitBodyIntoParagraphs(body: string): string[] {
+  const sentences = body.match(/[^.!?]+[.!?]+|[^.!?]+$/g)?.map((item) => item.trim()) ?? [body];
+
+  if (sentences.length <= 1) return [body];
+  if (sentences.length <= 4) return sentences;
+
+  const paragraphs: string[] = [];
+  for (let index = 0; index < sentences.length; index += 2) {
+    paragraphs.push(sentences.slice(index, index + 2).join(" "));
+  }
+
+  return paragraphs;
+}
+
+function ReadableBody({ body }: { body: string }) {
+  return (
+    <div className="mt-5 grid gap-4 text-[15px] leading-7 text-stone-200">
+      {splitBodyIntoParagraphs(body).map((paragraph) => (
+        <p key={paragraph} data-testid="card-body-paragraph">
+          {paragraph}
+        </p>
+      ))}
+    </div>
   );
 }
 
@@ -42,6 +69,7 @@ export function CardPlayer({
   const selectedIsCorrect =
     quiz && selectedOptionId ? selectedOptionId === quiz.correctOptionId : false;
   const selectedXp = selectedOptionId ? calculateAnswerXp(selectedIsCorrect) : 0;
+  const visual = getCardVisual(chapter.id, card, index);
 
   async function persistAnswer(optionId: string, quizCard: QuizCard) {
     const isCorrect = optionId === quizCard.correctOptionId;
@@ -103,7 +131,8 @@ export function CardPlayer({
         </p>
       </div>
       <h1 className="mt-3 text-2xl font-bold leading-tight">{card.title}</h1>
-      <p className="mt-4 leading-7 text-stone-200">{card.body}</p>
+      {visual ? <CardIllustration visual={visual} /> : null}
+      <ReadableBody body={card.body} />
 
       {"keyThought" in card && card.keyThought ? (
         <p className="mt-4 rounded-xl border border-moss/20 bg-moss/10 px-4 py-3 text-sm leading-6 text-moss">

@@ -46,10 +46,21 @@ describe("App final challenge", () => {
   });
 
   beforeEach(() => {
+    window.history.replaceState({}, "", "/");
     vi.clearAllMocks();
     mocks.getSessionIdCookie.mockReturnValue("session_1");
     mocks.repository.getSession.mockResolvedValue(session);
     mocks.repository.recordFinalResult.mockResolvedValue({ xpAwarded: 200 });
+  });
+
+  it("can hold the branded loader open for visual QA", async () => {
+    window.history.replaceState({}, "", "/?preview=loader");
+
+    render(<App />);
+
+    expect(screen.getByRole("status")).toHaveTextContent("Готовим первый драм");
+    expect(screen.getByRole("img", { name: "Бокал виски наполняется" })).toBeInTheDocument();
+    expect(mocks.repository.getSession).not.toHaveBeenCalled();
   });
 
   it("waits for the refreshed leaderboard before showing the final rank", async () => {

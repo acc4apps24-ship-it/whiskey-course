@@ -216,6 +216,19 @@ function AppContent() {
 }
 
 export default function App() {
+  const previewMode =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("preview")
+      : null;
+
+  if (previewMode === "loader") {
+    return (
+      <main className="grid min-h-[100svh] place-items-center px-5 py-6 safe-bottom">
+        <BrandedLoader label="Готовим первый драм" />
+      </main>
+    );
+  }
+
   return (
     <AppProvider>
       <AppContent />

@@ -52,6 +52,61 @@ const quizChapter: Chapter = {
 };
 
 describe("CardPlayer", () => {
+  it("splits long reading cards into scannable paragraphs", () => {
+    const chapter: Chapter = {
+      id: "chapter-2-speyside",
+      title: "Спейсайд",
+      subtitle: "Speyside",
+      durationMinutes: 7,
+      cards: [
+        {
+          id: "CH2-C01",
+          type: "content",
+          title: "Регион, с которого легко начать",
+          body:
+            "Спейсайд часто называют самым дружелюбным регионом Шотландии для новичков. Виски отсюда часто воспринимается мягким, фруктовым и понятным. Если представить Спейсайд как настроение, это не шторм у моря, а солнечный сад с яблоками, грушами, медом и цветами.",
+        },
+      ],
+    };
+
+    render(<CardPlayer chapter={chapter} onCompleteChapter={vi.fn()} />);
+
+    expect(screen.getAllByTestId("card-body-paragraph")).toHaveLength(3);
+  });
+
+  it("shows a chapter illustration on the first card and flavor art on tasting cards", async () => {
+    const chapter: Chapter = {
+      id: "chapter-2-speyside",
+      title: "Спейсайд",
+      subtitle: "Speyside",
+      durationMinutes: 7,
+      cards: [
+        {
+          id: "CH2-C01",
+          type: "content",
+          title: "Регион, с которого легко начать",
+          body:
+            "Спейсайд - солнечный сад с яблоками, грушами, медом и цветами.",
+        },
+        {
+          id: "CH2-C02",
+          type: "content",
+          title: "Вкусовой профиль Спейсайда",
+          body:
+            "Когда видишь в описании виски яблоко, грушу, мед, ваниль или цветы, есть шанс, что перед тобой профиль в духе Спейсайда.",
+        },
+      ],
+    };
+
+    render(<CardPlayer chapter={chapter} onCompleteChapter={vi.fn()} />);
+
+    expect(screen.getByRole("img", { name: "Иллюстрация главы: Спейсайд" })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Дальше" }));
+
+    expect(screen.getByRole("img", { name: "Иллюстрация вкусов: фрукты, мед, цветы, ваниль" })).toBeInTheDocument();
+  });
+
   it("does not reveal quiz answer before selection and shows explanation after answer", async () => {
     const onCompleteChapter = vi.fn();
     render(
