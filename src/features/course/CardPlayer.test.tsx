@@ -107,6 +107,17 @@ describe("CardPlayer", () => {
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
+  it("uses the supplied artwork for the First Dram intro", () => {
+    render(<CardPlayer chapter={quizChapter} onCompleteChapter={vi.fn()} />);
+
+    const illustration = screen.getByRole("img", { name: "Иллюстрация главы: Первый драм" });
+
+    expect(illustration.querySelector("img")).toHaveAttribute(
+      "src",
+      "/chapter-art/first-dram.png",
+    );
+  });
+
   it("does not reveal quiz answer before selection and shows explanation after answer", async () => {
     const onCompleteChapter = vi.fn();
     render(

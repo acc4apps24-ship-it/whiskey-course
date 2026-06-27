@@ -12,6 +12,7 @@ type ChapterMotifName =
 type ChapterVisual = {
   aria: string;
   accent: string;
+  imageSrc?: string;
   motif: ChapterMotifName;
 };
 
@@ -28,6 +29,7 @@ const chapterVisuals: Record<string, ChapterVisual> = {
   "chapter-1-first-dram": {
     aria: "Иллюстрация главы: Первый драм",
     accent: palette.gold,
+    imageSrc: "/chapter-art/first-dram.png",
     motif: "dram",
   },
   "chapter-2-speyside": {
@@ -224,6 +226,24 @@ function ChapterMotif({ motif }: { motif: ChapterMotifName }) {
 }
 
 export function CardIllustration({ visual }: { visual: NonNullable<ReturnType<typeof getCardVisual>> }) {
+  if (visual.imageSrc) {
+    return (
+      <div
+        role="img"
+        aria-label={visual.aria}
+        className="mt-5 overflow-hidden rounded-xl border border-[#E5B24A]/20 bg-[#0B0A09] shadow-[0_18px_60px_rgba(0,0,0,0.28)]"
+      >
+        <img
+          src={visual.imageSrc}
+          alt=""
+          className="aspect-[16/9] w-full object-cover"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       role="img"
