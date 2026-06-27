@@ -25,7 +25,7 @@ export function Leaderboard({ entries }: { entries: LeaderboardEntry[] }) {
   if (entries.length === 0) {
     return (
       <Card>
-        <p className="text-sm leading-6 text-stone-300">
+        <p className="text-base leading-7 text-stone-300">
           Пока нет результатов. Стань первым в лиге.
         </p>
       </Card>
@@ -37,8 +37,8 @@ export function Leaderboard({ entries }: { entries: LeaderboardEntry[] }) {
       <div className="flex items-center gap-3">
         <Trophy className="h-5 w-5 text-amber" aria-hidden="true" />
         <div>
-          <p className="text-xs font-bold uppercase text-moss">Рейтинг</p>
-          <h2 className="mt-1 text-xl font-bold">Лига Whisky Journey</h2>
+          <p className="text-[13px] font-bold uppercase leading-5 text-moss">Рейтинг</p>
+          <h2 className="mt-1 text-[22px] font-bold leading-tight">Лига Whisky Journey</h2>
         </div>
       </div>
 
@@ -50,17 +50,17 @@ export function Leaderboard({ entries }: { entries: LeaderboardEntry[] }) {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-bold text-amber">#{entry.rank}</p>
-                <h3 className="mt-1 break-words text-base font-bold">
+                <p className="text-[15px] font-bold leading-6 text-amber">#{entry.rank}</p>
+                <h3 className="mt-1 break-words text-lg font-bold leading-tight">
                   {entry.displayName}
                 </h3>
               </div>
-              <p className="shrink-0 text-sm font-bold text-amber">
+              <p className="shrink-0 text-[15px] font-bold leading-6 text-amber">
                 {entry.totalXp} XP
               </p>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px] leading-5">
               <span className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 font-semibold text-stone-300">
                 {formatChapterCount(entry.completedChapters)}
               </span>
@@ -71,7 +71,7 @@ export function Leaderboard({ entries }: { entries: LeaderboardEntry[] }) {
               ) : null}
             </div>
 
-            <p className="mt-3 text-xs leading-5 text-stone-400">
+            <p className="mt-3 text-[13px] leading-5 text-stone-400">
               {entry.achievements.length > 0
                 ? entry.achievements.join(", ")
                 : "Достижения ещё впереди"}

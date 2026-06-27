@@ -74,7 +74,7 @@ describe("CardPlayer", () => {
     expect(screen.getAllByTestId("card-body-paragraph")).toHaveLength(3);
   });
 
-  it("shows a chapter illustration on the first card and flavor art on tasting cards", async () => {
+  it("shows a chapter illustration only on the first card", async () => {
     const chapter: Chapter = {
       id: "chapter-2-speyside",
       title: "Спейсайд",
@@ -104,7 +104,7 @@ describe("CardPlayer", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Дальше" }));
 
-    expect(screen.getByRole("img", { name: "Иллюстрация вкусов: фрукты, мед, цветы, ваниль" })).toBeInTheDocument();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
   });
 
   it("does not reveal quiz answer before selection and shows explanation after answer", async () => {

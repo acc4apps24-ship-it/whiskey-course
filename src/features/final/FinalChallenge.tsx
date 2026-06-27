@@ -74,39 +74,39 @@ export function FinalChallenge({
     return (
       <Card className="grid gap-5">
         <div>
-          <p className="text-xs font-bold uppercase text-amber">Финал</p>
+          <p className="text-[13px] font-bold uppercase leading-5 text-amber">Финал</p>
           <h1 className="mt-2 text-3xl font-bold leading-tight">
             Путешествие завершено
           </h1>
-          <p className="mt-3 leading-7 text-stone-200">
+          <p className="mt-3 text-[17px] leading-8 text-stone-200">
             Теперь у тебя есть карта: регионы, бочки, торф и дегустация. Этого
             достаточно, чтобы говорить о виски увереннее - и без снобизма.
           </p>
         </div>
 
         <div className="rounded-xl border border-moss/25 bg-moss/10 p-4">
-          <p className="text-sm font-bold text-moss">
+          <p className="text-base font-bold leading-7 text-moss">
             Правильных ответов: {completedResult.correctAnswers}/{questions.length}
           </p>
-          <p className="mt-2 text-sm text-stone-200">
+          <p className="mt-2 text-base leading-7 text-stone-200">
             XP за финал: {completedResult.xp}
           </p>
           {typeof summary?.totalXp === "number" ? (
-            <p className="mt-2 text-sm text-stone-200">
+            <p className="mt-2 text-base leading-7 text-stone-200">
               Общий XP: {summary.totalXp}
             </p>
           ) : null}
           {typeof summary?.leaderboardRank === "number" ? (
-            <p className="mt-2 text-sm text-stone-200">
+            <p className="mt-2 text-base leading-7 text-stone-200">
               Место в leaderboard: #{summary.leaderboardRank}
             </p>
           ) : null}
           {summary?.achievements?.length ? (
-            <p className="mt-2 text-sm text-stone-200">
+            <p className="mt-2 text-base leading-7 text-stone-200">
               Достижения: {summary.achievements.join(", ")}
             </p>
           ) : null}
-          <p className="mt-3 text-sm leading-6 text-stone-200">
+          <p className="mt-3 text-base leading-7 text-stone-200">
             {getResultMessage(completedResult.correctAnswers)}
           </p>
         </div>
@@ -125,12 +125,12 @@ export function FinalChallenge({
     <Card>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase text-amber">Финал</p>
+          <p className="text-[13px] font-bold uppercase leading-5 text-amber">Финал</p>
           <h1 className="mt-2 text-3xl font-bold leading-tight">
             Финальное испытание
           </h1>
         </div>
-        <p className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-sm font-bold text-stone-200">
+        <p className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[15px] font-bold leading-6 text-stone-200">
           {answeredCount}/{questions.length}
         </p>
       </div>
@@ -141,10 +141,10 @@ export function FinalChallenge({
             key={question.id}
             className="rounded-xl border border-white/10 bg-black/20 p-4"
           >
-            <p className="text-xs font-bold uppercase text-moss">
+            <p className="text-[13px] font-bold uppercase leading-5 text-moss">
               Вопрос {index + 1}
             </p>
-            <h2 className="mt-2 text-lg font-bold leading-snug">
+            <h2 className="mt-2 text-xl font-bold leading-snug">
               {question.question}
             </h2>
             <div className="mt-4 grid gap-2">
@@ -180,7 +180,7 @@ export function FinalChallenge({
       >
         {isCompleting ? "Сохраняем результат..." : "Завершить испытание"}
       </Button>
-      {error ? <p className="mt-3 text-sm text-red-200">{error}</p> : null}
+      {error ? <p className="mt-3 text-[15px] leading-6 text-red-200">{error}</p> : null}
     </Card>
   );
 }

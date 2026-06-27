@@ -57,12 +57,12 @@ export function TastingNoteForm({
 
   return (
     <form className="mt-6 grid gap-3" onSubmit={submit}>
-      <p className="text-sm leading-6 text-stone-300">
+      <p className="text-base leading-7 text-stone-300">
         Практика опциональна: можно использовать реальный виски, описание бутылки или
         безалкогольную альтернативу. Маленький глоток, вода рядом, не садиться за руль.
       </p>
       {fields.map((field) => (
-        <label className="grid gap-1 text-sm" key={field.key}>
+        <label className="grid gap-2 text-base leading-7" key={field.key}>
           {field.label}
           <Input
             value={note[field.key] ?? ""}
@@ -70,7 +70,7 @@ export function TastingNoteForm({
           />
         </label>
       ))}
-      {error ? <p className="text-sm text-red-200">{error}</p> : null}
+      {error ? <p className="text-[15px] leading-6 text-red-200">{error}</p> : null}
       <Button type="submit">Сохранить заметку</Button>
     </form>
   );

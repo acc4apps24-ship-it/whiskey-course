@@ -30,6 +30,9 @@ body {
     ),
     linear-gradient(160deg, #101714 0%, #141a19 48%, #0b0d0c 100%);
   color: #f7f1e7;
+  font-size: 16px;
+  line-height: 1.55;
+  text-size-adjust: 100%;
 }
 
 button,

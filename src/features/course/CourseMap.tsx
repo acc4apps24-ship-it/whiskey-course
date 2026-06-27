@@ -29,16 +29,16 @@ export function CourseMap({
   return (
     <div className="grid gap-4">
       <Card className="overflow-hidden">
-        <p className="text-sm font-semibold text-moss">Whisky Map</p>
+        <p className="text-[15px] font-semibold leading-6 text-moss">Whisky Map</p>
         <h1 className="mt-2 text-3xl font-bold leading-tight">
           Путешествие по Шотландии
         </h1>
-        <p className="mt-3 text-sm leading-6 text-stone-300">
+        <p className="mt-3 text-base leading-7 text-stone-300">
           Выбирай главу, проходи карточки и открывай финальное испытание.
         </p>
         <div className="mt-5">
           <Progress value={progress} />
-          <p className="mt-2 text-sm text-stone-300">
+          <p className="mt-2 text-[15px] leading-6 text-stone-300">
             {completedRequiredChapterIds.length}/{course.chapters.length} глав
           </p>
         </div>
@@ -52,18 +52,18 @@ export function CourseMap({
             <Card key={chapter.id} className="grid gap-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-bold uppercase text-amber">
+                  <p className="text-[13px] font-bold uppercase leading-5 text-amber">
                     Глава {index + 1}
                   </p>
-                  <h2 className="mt-1 text-xl font-bold">{chapter.title}</h2>
+                  <h2 className="mt-1 text-[22px] font-bold leading-tight">{chapter.title}</h2>
                 </div>
                 {completed ? (
-                  <span className="rounded-full border border-moss/30 bg-moss/10 px-3 py-1 text-xs font-bold text-moss">
+                  <span className="rounded-full border border-moss/30 bg-moss/10 px-3 py-1 text-[13px] font-bold leading-5 text-moss">
                     Пройдена
                   </span>
                 ) : null}
               </div>
-              <p className="text-sm text-stone-300">
+              <p className="text-[15px] leading-6 text-stone-300">
                 {chapter.subtitle} · {chapter.durationMinutes} мин
               </p>
               <Button
@@ -78,9 +78,9 @@ export function CourseMap({
       </div>
 
       <Card className="border-amber/20 bg-copper/10">
-        <p className="text-xs font-bold uppercase text-amber">Финиш</p>
-        <h2 className="mt-1 text-xl font-bold">{course.finalChallenge.title}</h2>
-        <p className="mt-2 text-sm text-stone-300">
+        <p className="text-[13px] font-bold uppercase leading-5 text-amber">Финиш</p>
+        <h2 className="mt-1 text-[22px] font-bold leading-tight">{course.finalChallenge.title}</h2>
+        <p className="mt-2 text-[15px] leading-6 text-stone-300">
           {finalUnlocked
             ? "Финальное испытание доступно"
             : "Финальное испытание закрыто"}

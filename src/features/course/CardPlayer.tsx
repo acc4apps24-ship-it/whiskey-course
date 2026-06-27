@@ -30,7 +30,7 @@ function splitBodyIntoParagraphs(body: string): string[] {
 
 function ReadableBody({ body }: { body: string }) {
   return (
-    <div className="mt-5 grid gap-4 text-[15px] leading-7 text-stone-200">
+    <div className="mt-5 grid gap-5 text-[17px] leading-8 text-stone-200">
       {splitBodyIntoParagraphs(body).map((paragraph) => (
         <p key={paragraph} data-testid="card-body-paragraph">
           {paragraph}
@@ -124,18 +124,18 @@ export function CardPlayer({
 
   return (
     <Card>
-      <div className="flex items-center justify-between gap-3 text-sm">
+      <div className="flex items-center justify-between gap-3 text-[15px] leading-6">
         <p className="font-semibold text-amber">{chapter.title}</p>
         <p className="text-stone-400">
           {index + 1}/{chapter.cards.length}
         </p>
       </div>
-      <h1 className="mt-3 text-2xl font-bold leading-tight">{card.title}</h1>
+      <h1 className="mt-3 text-[28px] font-bold leading-[1.12]">{card.title}</h1>
       {visual ? <CardIllustration visual={visual} /> : null}
       <ReadableBody body={card.body} />
 
       {"keyThought" in card && card.keyThought ? (
-        <p className="mt-4 rounded-xl border border-moss/20 bg-moss/10 px-4 py-3 text-sm leading-6 text-moss">
+        <p className="mt-5 rounded-xl border border-moss/20 bg-moss/10 px-4 py-3 text-base leading-7 text-moss">
           {card.keyThought}
         </p>
       ) : null}
@@ -162,7 +162,7 @@ export function CardPlayer({
             );
           })}
           {selectedOptionId ? (
-            <div className="rounded-xl border border-white/10 bg-black/20 p-4 text-sm leading-6 text-stone-200">
+            <div className="rounded-xl border border-white/10 bg-black/20 p-4 text-base leading-7 text-stone-200">
               <p className="font-bold text-foreground">
                 {selectedIsCorrect
                   ? `Верно. +${selectedXp} XP`
@@ -204,7 +204,7 @@ export function CardPlayer({
       >
         {isCompletingChapter ? "Сохраняем прогресс..." : isLast ? "Завершить главу" : "Дальше"}
       </Button>
-      {completionError ? <p className="mt-3 text-sm text-red-200">{completionError}</p> : null}
+      {completionError ? <p className="mt-3 text-[15px] leading-6 text-red-200">{completionError}</p> : null}
     </Card>
   );
 }

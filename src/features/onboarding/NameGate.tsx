@@ -36,7 +36,7 @@ export function NameGate({
         Как тебя показывать в рейтинге?
       </h1>
       <form className="mt-6 grid gap-4" onSubmit={submit}>
-        <label className="grid gap-2 text-sm font-semibold">
+        <label className="grid gap-2 text-base font-semibold leading-7">
           Имя в рейтинге
           <Input
             value={name}
@@ -45,8 +45,8 @@ export function NameGate({
             maxLength={24}
           />
         </label>
-        {error ? <p className="text-sm text-red-200">{error}</p> : null}
-        {submitError ? <p className="text-sm text-red-200">{submitError}</p> : null}
+        {error ? <p className="text-[15px] leading-6 text-red-200">{error}</p> : null}
+        {submitError ? <p className="text-[15px] leading-6 text-red-200">{submitError}</p> : null}
         <Button type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Создаём сессию..." : "Начать путешествие"}
         </Button>

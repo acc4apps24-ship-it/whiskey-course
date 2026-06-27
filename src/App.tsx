@@ -101,7 +101,7 @@ function AppContent() {
     <main className="min-h-[100svh] px-5 py-6 safe-bottom">
       <section className="mx-auto flex min-h-[calc(100svh-3rem)] max-w-md flex-col justify-center">
         {app.error && app.screen !== "name-gate" ? (
-          <p className="mb-4 rounded-lg border border-red-300/30 bg-red-950/40 px-4 py-3 text-sm text-red-100">
+          <p className="mb-4 rounded-lg border border-red-300/30 bg-red-950/40 px-4 py-3 text-[15px] leading-6 text-red-100">
             {app.error}
           </p>
         ) : null}
@@ -160,7 +160,7 @@ function AppContent() {
         ) : null}
         {app.screen === "course" && !activeChapter ? (
           <div className="grid gap-4">
-            <p className="text-sm text-smoke">
+            <p className="text-[15px] leading-6 text-smoke">
               С возвращением, {app.session?.displayName}.
             </p>
             {isFinalChallengeOpen ? (
