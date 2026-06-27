@@ -16,7 +16,8 @@ Required frontend env:
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_DATA_MODE=supabase`
 
-Use `VITE_DATA_MODE=mock` only for local UI work without Supabase.
+If these values are not provided, the app runs in mock/demo mode without Supabase.
+Use `VITE_DATA_MODE=supabase` only when Supabase env values are configured.
 Do not commit `.env`.
 Do not use Supabase `service_role` key in frontend.
 

@@ -7,7 +7,7 @@ type ViteEnv = {
 };
 
 const viteEnv = (import.meta as ImportMeta & { env: ViteEnv }).env;
-const dataMode = (viteEnv.VITE_DATA_MODE ?? "supabase") as DataMode;
+const dataMode = (viteEnv.VITE_DATA_MODE ?? "mock") as DataMode;
 
 export const env = {
   supabaseUrl: viteEnv.VITE_SUPABASE_URL,

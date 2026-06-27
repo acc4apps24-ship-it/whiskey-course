@@ -21,6 +21,10 @@ Environment variables must be provided by GitHub/deploy secrets:
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_DATA_MODE=supabase`
 
+For a temporary public demo without Supabase, omit these values or set:
+
+- `VITE_DATA_MODE=mock`
+
 Frontend uses Supabase anon key only. Never add Supabase service role key to GitHub, Vite env, or committed files.
 
 ## Supabase
